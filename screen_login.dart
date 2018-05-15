@@ -1,58 +1,87 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
-import 'screen_events.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-final googleSignIn = new GoogleSignIn();
-final auth = FirebaseAuth.instance;
+final FirebaseAuth _auth = FirebaseAuth.instance;
+final GoogleSignIn _googleSignIn = new GoogleSignIn();
 
-class LoginScreen extends StatelessWidget {
+class ScreenLogin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new LoginScreenState();
+    return new ScreenLoginState();
   }
 }
-class LoginScreenState extends StatefulWidget {
+
+class ScreenLoginState extends StatefulWidget {
   @override
-  _LoginScreenState createState() => new _LoginScreenState();
+  _ScreenLoginBuild createState() => new _ScreenLoginBuild();
 }
-class _LoginScreenState extends State<LoginScreenState> {
+
+class _ScreenLoginBuild extends State<ScreenLoginState> {
+  String _name = "Logged out";
+  String _image =
+      "https://firebasestorage.googleapis.com/v0/b/iconic-medley-510.appspot.com/o/01%20Landing.png?alt=media&token=ea417557-d398-4ce1-a454-5043f0faeee1";
+
+  void changePic(image) {
+    setState(() {
+      _image = image;
+      _name = "OK";
+    });
+  }
+
+  void _testSignInWithGoogle() async {
+    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final FirebaseUser user = await _auth.signInWithGoogle(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+    assert(user.email != null);
+    assert(user.displayName != null);
+    assert(!user.isAnonymous);
+    assert(await user.getIdToken() != null);
+
+    final FirebaseUser currentUser = await _auth.currentUser();
+    assert(user.uid == currentUser.uid);
+    changePic(_googleSignIn.currentUser.photoUrl);
+
+    print('signInWithGoogle succeeded:' + _googleSignIn.currentUser.photoUrl);
+//  return 'signInWithGoogle succeeded: $user';
+  }
+
   @override
   Widget build(BuildContext context) {
-//    _silentLogIn(context);
-    return new Scaffold(
-      body: new Center(
-        child: new RaisedButton(
-          child: new Text('Launch new screen'),
-          onPressed: () {
-            _handleSubmitted(context);
-          },
+    if (_name == "Logged out") _testSignInWithGoogle();
+    return new CustomScrollView(slivers: <Widget>[
+      new SliverAppBar(
+        actions: <Widget>[
+          new IconButton(
+            icon: const Icon(Icons.add_circle),
+            tooltip: 'Add new entry',
+            onPressed: () {
+              /* ... */
+            },
+          ),
+          new CircleAvatar(radius: 12.0, backgroundImage: new NetworkImage(_image)),
+        ],
+        pinned: true,
+        expandedHeight: 200.0,
+        flexibleSpace: const FlexibleSpaceBar(
+          title: const Text('Punch'),
         ),
       ),
-    );
-  }
-  Future<Null> _handleSubmitted(BuildContext context) async {
-    await _ensureLoggedIn();
-    Navigator.push(
-      context,
-      new MaterialPageRoute(builder: (context) => new ScreenEvents()),
-    );
-  }
-  Future<Null> _ensureLoggedIn() async {
-    GoogleSignInAccount user = googleSignIn.currentUser;
-    if (user == null)
-      user = await googleSignIn.signInSilently();
-    if (user == null) {
-      await googleSignIn.signIn();
-    }
-    if (await auth.currentUser() == null) {
-      GoogleSignInAuthentication credentials =
-      await googleSignIn.currentUser.authentication;
-      await auth.signInWithGoogle(
-        idToken: credentials.idToken,
-        accessToken: credentials.accessToken,
-      );
-    }
+      new SliverList(
+        delegate: new SliverChildBuilderDelegate(
+          (BuildContext context, int index) {
+            return new Container(
+              alignment: Alignment.center,
+              color: Colors.lightBlue[100 * (index % 9)],
+              child: new Text('list item $index'),
+            );
+          },
+        ),
+      )
+    ]);
   }
 }
