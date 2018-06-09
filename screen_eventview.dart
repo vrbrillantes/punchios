@@ -3,18 +3,26 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'model_events.dart';
-import 'model_feedback.dart';
 import 'model_profile.dart';
 import 'model_session.dart';
 import 'model_sessionregistration.dart';
+import 'model_eventdetail.dart';
+import 'model_feedback.dart';
 import 'util_firebase.dart';
-import 'util_account.dart';
 import 'ui_sessionbanner.dart';
-import 'screen_questions.dart';
-import 'screen_eventsessions.dart';
-import 'screen_eventfeedback.dart';
-import 'screen_newQuestion.dart';
+import 'screen_viewListSessions.dart';
+import 'util_gcal.dart';
+import 'screen_eventCreate.dart';
+import 'dialog_feedback.dart';
+import 'dialog_inquiry.dart';
+import 'alert_QR.dart';
+import 'dialog_reg_cancel.dart';
 import 'util_preferences.dart';
+import 'alert_M_registration.dart' as DialReg;
+//import 'alert_registration.dart';
+import 'util_qr.dart';
+import 'package:barcode_scan/barcode_scan.dart';
+import 'package:googleapis/calendar/v3.dart' as Cal;
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
 final GoogleSignIn _googleSignIn = new GoogleSignIn();
@@ -46,29 +54,41 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> {
   final ItemEvent loadEvent;
   final double _appBarHeight = 175.0;
   bool _registered = false;
+  bool _confirmed = false;
   bool _loggedIn = false;
-
+  bool _isCreator = false;
+  bool _isCollaborator = false;
+  bool _isInvited = false;
+  int confirmed = 0;
+  int registered = 0;
   StreamSubscription _subscriptionTodo;
   List<ItemSession> _sessionList = <ItemSession>[];
-  Map<String, String> _attendanceList = {};
+  Map<String, ItemSessionRegistration> _attendanceList = {};
 
   void loggedIn(credentials) {
     setState(() {
       _loggedIn = true;
       _profile = ItemProfile.saveCredentials(credentials);
+      if (loadEvent.creator == _profile.userKey) _isCreator = true;
+      if (loadEvent.collaborators.containsKey(_profile.userKey)) _isCollaborator = true;
       AppPreferences.saveLogin(_profile);
-
-      if (loadEvent.attendeelist.containsKey(AccountUtils.getUserKey(_profile.email))) {
-        if (loadEvent.attendeelist[AccountUtils.getUserKey(_profile.email)] == true) _registered = true;
-      }
     });
   }
 
   @override
   void initState() {
+    GoogleCalendar.eventDetails(loadEvent, eventRetrieved);
     AppPreferences.getLogin(_showLogin);
-    FirebaseMethods.getSessionDetails(loadEvent.key, _showSessions).then((StreamSubscription s) => _subscriptionTodo = s);
+    FirebaseMethods.getAttendees(loadEvent.key, _showAttendees);
+    FirebaseMethods.getSessionDetails(loadEvent.key, _showSessions);
     super.initState();
+  }
+
+  void eventRetrieved(Cal.Event e) {
+    setState(() {
+      loadEvent.gCal = e;
+      _isInvited = true;
+    });
   }
 
   _showLogin(ItemProfile p) {
@@ -76,12 +96,9 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> {
       if (p.name != null) {
         _loggedIn = true;
         _profile = p;
-        if (loadEvent.attendeelist.containsKey(AccountUtils.getUserKey(_profile.email))) {
-          if (loadEvent.attendeelist[AccountUtils.getUserKey(_profile.email)] == true) _registered = true;
-        }
-        FirebaseMethods
-            .getMyEventRegisteredSessions(loadEvent.key, _profile.email, _showAttendance, _noAttendance)
-            .then((StreamSubscription s) => _subscriptionTodo = s);
+        if (loadEvent.creator == _profile.userKey) _isCreator = true;
+        if (loadEvent.collaborators.containsKey(_profile.userKey)) _isCollaborator = true;
+        FirebaseMethods.getAttendance(loadEvent.key, _profile.userKey, _showAttendance, _isConfirmed, _isRegistered, _noAttendance);
       } else {
         _testSignInWithGoogle();
       }
@@ -94,16 +111,6 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> {
       _subscriptionTodo.cancel();
     }
     super.dispose();
-  }
-
-  void _gotoQuestions() {
-    Navigator.push(
-        context,
-        new MaterialPageRoute(
-            builder: (context) =>
-            new ScreenQuestionView(
-              loadEvent: loadEvent,
-            )));
   }
 
   void _testSignInWithGoogle() async {
@@ -123,75 +130,99 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> {
     loggedIn(_googleSignIn);
   }
 
-  Future _gotoFeedback() async {
-    List<ItemFeedback> answers =
-    await Navigator.push(
-        context, new MaterialPageRoute(builder: (context) => new ScreenEventFeedback(loadEvent: loadEvent, questionlist: loadEvent.questionlist,)));
-    if (answers != null) FirebaseMethods.submitFeedback(_profile.name, loadEvent.key, answers);
+  void _showQRScreen() {
+    Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (context) => new ShowQR(
+                  action: "JE",
+                  loadEvent: loadEvent.event,
+                )));
   }
 
-  Future sendFeedback(ItemSession s) async {
-    List<ItemFeedback> answers =
-    await Navigator.push(
-        context, new MaterialPageRoute(builder: (context) => new ScreenEventFeedback(loadEvent: loadEvent, questionlist: s.questionlist)));
-    if (answers != null) FirebaseMethods.submitSessionFeedback(_profile.name, loadEvent.key, s.key, answers);
+  void _showQRScreenLeave() {
+    Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (context) => new ShowQR(
+                  action: "LE",
+                  loadEvent: loadEvent.event,
+                )));
+  }
+
+  void sendFeedback(List<ItemFeedback> lq, ItemEventDetails d) {
+    Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (context) => new ScreenEventFeedback(
+                  questionList: lq,
+                  feedback: d,
+                )));
   }
 
   Future _registerSession() async {
-    bool registered = await Navigator.push(context, new MaterialPageRoute(builder: (context) => new ScreenEventSessions(loadEvent: loadEvent)));
-    if (registered)
-      FirebaseMethods.registerMe(_profile.email, loadEvent.key, (() {
-        setState(() {
-          _registered = true;
-        });
-      }));
-  }
-
-  void _registerEvent() {
     if (_loggedIn) {
-      FirebaseMethods.registerMe(_profile.email, loadEvent.key, (() {
-        setState(() {
-          _registered = true;
-        });
-      }));
+      await Navigator.push(
+          context,
+          new MaterialPageRoute(
+              builder: (context) => new ScreenEventSessions(sessionList: _sessionList, attendanceList: _attendanceList, loadEvent: loadEvent)));
+      FirebaseMethods.getAttendance(loadEvent.key, _profile.userKey, _showAttendance, _isConfirmed, _isRegistered, _noAttendance);
     }
   }
 
-  void _leaveEvent() {
-    FirebaseMethods.unregisterMe(_profile.email, loadEvent.key, (() {
-      setState(() {
-        _registered = false;
-      });
-    }));
+  Future _registerEvent() async {
+    if (_loggedIn) {
+      await showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) => DialReg.RegistrationDialog(context, loadEvent)
+      );
+//      await Navigator.push(context, new MaterialPageRoute(builder: (context) => new AlertRegistration(loadEvent: loadEvent)));
+      FirebaseMethods.getAttendance(loadEvent.key, _profile.userKey, _showAttendance, _isConfirmed, _isRegistered, _noAttendance);
+    }
   }
 
-  Future _editAttendance() async {
-    await Navigator.push(context, new MaterialPageRoute(builder: (context) => new ScreenEventSessions(loadEvent: loadEvent)));
-    FirebaseMethods
-        .getMyEventRegisteredSessions(loadEvent.key, _profile.email, _showAttendance, _noAttendance)
-        .then((StreamSubscription s) => _subscriptionTodo = s);
+  Future _leaveEvent() async {
+    await Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (context) => new ScreenCancelRegistrationState(
+                  loadEvent: loadEvent.event,
+                )));
+    FirebaseMethods.getAttendance(loadEvent.key, _profile.userKey, _showAttendance, _isConfirmed, _isRegistered, _noAttendance);
   }
 
-  Future _askQuestion() async {
-    String s = await Navigator.push(context, new MaterialPageRoute(builder: (context) => new ScreenNewQuestion()));
-    if (s != null) FirebaseMethods.submitQuestion(_profile.name, _profile.photo, loadEvent.key, s);
+  void askQuestion() {
+    Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (context) => new ScreenNewQuestion(
+                  questionKey: loadEvent.event,
+                )));
   }
 
-  Future askSessionQuestion(ItemSession session) async {
-    String s = await Navigator.push(context, new MaterialPageRoute(builder: (context) => new ScreenNewQuestion()));
-    if (s != null) FirebaseMethods.submitSessionQuestion(_profile.name, _profile.photo, loadEvent.key, session.key, s);
+  Future showEventDetails(ItemEvent e) async {
+    bool edited = await Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => new ScreenEventDetails(loadEvent: e)),
+    );
+    if (edited) print("EDITED");
+    //TODO event refresh
   }
 
+  void askSessionQuestion(ItemSession session) {
+    Navigator.push(
+        context,
+        new MaterialPageRoute(
+            builder: (context) => new ScreenNewQuestion(
+                  questionKey: session.session,
+                )));
+  }
 
   @override
   Widget build(BuildContext context) {
-    RaisedButton toshow = new RaisedButton(
-      color: Colors.blue.shade600,
-      textColor: Colors.white,
-      child: const Text('Register'),
-      onPressed: null,
-      disabledColor: Colors.grey.shade200,
-    );
+    RaisedButton primaryButton;
+    RaisedButton secondaryButton;
 
     RaisedButton register = new RaisedButton(
       color: Colors.blue.shade600,
@@ -199,107 +230,147 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> {
       child: const Text('Register'),
       onPressed: _registerEvent,
     );
+    RaisedButton gregister = new RaisedButton(
+      color: Colors.blue.shade600,
+      textColor: Colors.white,
+      child: const Text('Accept'),
+      onPressed: _registerEvent,
+    );
+
     RaisedButton registerSession = new RaisedButton(
       color: Colors.blue.shade600,
       textColor: Colors.white,
-      child: const Text('Register'),
+      child: const Text('Join a session'),
       onPressed: _registerSession,
     );
 
     RaisedButton leave = new RaisedButton(
-      color: Colors.blue.shade600,
+      color: Colors.grey.shade600,
       textColor: Colors.white,
-      child: const Text('Cancel my registration'),
+      child: const Text('Cancel registration'),
       onPressed: _leaveEvent,
     );
-    RaisedButton viewQuestions = new RaisedButton(
+
+    RaisedButton scan = new RaisedButton(
+      color: Colors.green.shade600,
+      textColor: Colors.white,
+      child: const Text('Check-In'),
+      onPressed: _checkin,
+    );
+
+    //TODO functionality for checkout
+    RaisedButton scanout = new RaisedButton(
+      color: Colors.green.shade600,
+      textColor: Colors.white,
+      child: const Text('Check-Out'),
+      onPressed: _checkout,
+    );
+
+    RaisedButton showQR = new RaisedButton(
       color: Colors.blue.shade600,
       textColor: Colors.white,
-      child: const Text('View questions'),
-      onPressed: _gotoQuestions,
+      child: const Text('Show QR'),
+      onPressed: _showQRScreen,
+    );
+    RaisedButton showLeaveQR = new RaisedButton(
+      color: Colors.blue.shade600,
+      textColor: Colors.white,
+      child: const Text('Checkout QR'),
+      onPressed: _showQRScreenLeave,
     );
 
     RaisedButton editAttendance = new RaisedButton(
       color: Colors.blue.shade600,
       textColor: Colors.white,
       child: const Text('Edit my registration'),
-      onPressed: _editAttendance,
+      onPressed: _registerSession,
     );
 
     RaisedButton ask = new RaisedButton(
       color: Colors.blue.shade600,
       textColor: Colors.white,
       child: const Text('Ask a question'),
-      onPressed: _askQuestion,
-    );
-
-    //TODO ask session button
-    RaisedButton askSession = new RaisedButton(
-      textColor: Colors.white,
-      child: const Text('Ask a question'),
-      disabledColor: Colors.grey.shade200,
-      onPressed: null,
+      onPressed: askQuestion,
     );
 
     RaisedButton rate = new RaisedButton(
       color: Colors.blue.shade600,
       textColor: Colors.white,
       child: const Text('Submit feedback'),
-      onPressed: _gotoFeedback,
+      onPressed: (() {
+        sendFeedback(loadEvent.questionlist, loadEvent.event);
+      }),
     );
 
-    if (_registered) {
-      if (new DateTime.now().isBefore(loadEvent.start.datetime)) {
-        if (_sessionList.length > 0) {
-          toshow = editAttendance;
-        } else {
-          toshow = leave;
-        }
+    if (_confirmed) {
+      if (new DateTime.now().isBefore(loadEvent.event.end.datetime)) {
+        //before event
+        _sessionList.length > 0 ? primaryButton = editAttendance : primaryButton = ask;
+        secondaryButton = scanout;
       } else {
-        if (_sessionList.length > 0) {
-          if (_attendanceList != null) {
-            toshow = askSession;
-          } else {
-            toshow = editAttendance;
-          }
-        } else {
-          toshow = ask;
-        }
+        //after event
+        if (_sessionList.length == 0) primaryButton = rate;
       }
-      if (new DateTime.now().isAfter(loadEvent.end.datetime)) toshow = rate;
+    } else if (_registered) {
+      if (new DateTime.now().isBefore(loadEvent.event.end.datetime)) {
+        //before event
+        _sessionList.length > 0 ? primaryButton = editAttendance : primaryButton = leave;
+        secondaryButton = scan;
+      }
     } else {
       if (_loggedIn) {
-        if (_sessionList.length > 0) {
-          toshow = registerSession;
-        } else {
-          toshow = register;
+        if (new DateTime.now().isBefore(loadEvent.event.end.datetime)) {
+          if (_sessionList.length > 0) {
+            primaryButton = registerSession;
+          } else {
+            primaryButton = register;
+            _isInvited ? primaryButton = gregister : primaryButton = register;
+          }
         }
       }
     }
 
+    InkWell editEvent;
     List<Widget> buttons = <Widget>[];
-    buttons.add(new Expanded(child: toshow));
-    if (loadEvent.creator == _profile.email || _profile.email == "vcbrillantes@globe.com.ph") buttons.add(new Expanded(child: viewQuestions));
+    if (primaryButton != null) buttons.add(new Expanded(child: primaryButton));
+    buttons.add(new SizedBox(
+      width: 5.0,
+    ));
+    if (secondaryButton != null) buttons.add(new Expanded(child: secondaryButton));
 
+    if (_isCreator || _isCollaborator) {
+      editEvent = new InkWell(
+        child: new Icon(
+          Icons.create,
+          color: Colors.blue.shade500,
+        ),
+        onTap: (() {
+          showEventDetails(loadEvent);
+        }),
+      );
+      if (new DateTime.now().isBefore(loadEvent.event.end.datetime)) buttons.add(new Expanded(child: showQR));
+      if (new DateTime.now().isAfter(loadEvent.event.start.datetime)) buttons.add(new Expanded(child: showLeaveQR));
+    }
+
+    BottomAppBar botNav;
+    if (buttons.length > 0) {
+      botNav = new BottomAppBar(
+        color: Colors.white,
+        child: new Container(
+          padding: const EdgeInsets.all(16.0),
+          child: new Row(children: buttons),
+        ),
+      );
+    }
     return new Theme(
       data: new ThemeData(
         brightness: Brightness.light,
-        platform: Theme
-            .of(context)
-            .platform,
+        platform: Theme.of(context).platform,
       ),
       child: new Scaffold(
-        bottomNavigationBar: new BottomAppBar(
-          color: Colors.white,
-          child: new Container(
-            padding: const EdgeInsets.all(16.0),
-            child: new Row(
-                children: buttons
-            ),
-          ),
-        ),
+        bottomNavigationBar: botNav,
         appBar: new AppBar(
-          title: new Text(loadEvent.name),
+          title: new Text(loadEvent.event.name),
         ),
         body: new CustomScrollView(
           slivers: <Widget>[
@@ -317,60 +388,51 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> {
             ),
             new SliverList(
               delegate: new SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
+                (BuildContext context, int index) {
                   switch (index) {
                     case 0:
                       return new ListTile(
-                        title: new Text(loadEvent.name, style: Theme
-                            .of(context)
-                            .textTheme
-                            .title),
+                        title: new Text(loadEvent.event.name, style: Theme.of(context).textTheme.title),
+                        trailing: editEvent,
+                        subtitle: new Text("$confirmed confirmed out of $registered registered attendees"),
                       );
                     case 1:
                       return new Row(
                         children: <Widget>[
                           new Expanded(
                               child: new ListTile(
-                                leading: const Icon(Icons.date_range),
-                                title: new Text(loadEvent.start.longdate, style: Theme
-                                    .of(context)
-                                    .textTheme
-                                    .body2),
-                                subtitle: new Text(loadEvent.start.time + " - " + loadEvent.end.time, style: new TextStyle(color: Colors.grey)),
-                              )),
+                            leading: const Icon(Icons.date_range),
+                            title: new Text(loadEvent.event.start.longdate, style: Theme.of(context).textTheme.body2),
+                            subtitle:
+                                new Text(loadEvent.event.start.time + " - " + loadEvent.event.end.time, style: new TextStyle(color: Colors.grey)),
+                          )),
                           new Expanded(
                               child: new ListTile(
-                                leading: const Icon(Icons.location_on),
-                                title: new Text(loadEvent.venue, style: Theme
-                                    .of(context)
-                                    .textTheme
-                                    .body2),
-                                subtitle: new Text(loadEvent.venueSpec, style: new TextStyle(color: Colors.grey)),
-                              )),
+                            leading: const Icon(Icons.location_on),
+                            title: new Text(loadEvent.event.venue, style: Theme.of(context).textTheme.body2),
+                            subtitle: new Text(loadEvent.venueSpec, style: new TextStyle(color: Colors.grey)),
+                          )),
                         ],
                       );
                     case 2:
                       return new Container(
                         padding: EdgeInsets.all(16.0),
-                        child: new Text(loadEvent.description, style: Theme
-                            .of(context)
-                            .textTheme
-                            .body1),
+                        child: new Text(loadEvent.event.description, style: Theme.of(context).textTheme.body1),
                       );
                   }
                 },
-                childCount: 4,
+                childCount: 3,
               ),
             ),
             new SliverList(
               delegate: new SliverChildBuilderDelegate(
-                    (BuildContext context, int index) {
+                (BuildContext context, int index) {
                   void _askSessionQuestion() {
                     askSessionQuestion(_sessionList[index]);
                   }
 
                   void _sendFeedback() {
-                    sendFeedback(_sessionList[index]);
+                    sendFeedback(_sessionList[index].questionlist, _sessionList[index].session);
                   }
 
                   return new SessionBanner(
@@ -395,15 +457,107 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> {
     });
   }
 
+  _showAttendees(ListEventAttendees value) {
+    setState(() {
+      registered = value.attendeeList.length;
+      confirmed = value.confirmedAttendees.length;
+    });
+    print(value.confirmedAttendees.length);
+    print(value.attendeeList.length);
+  }
+
   _showAttendance(ListSessionRegistrations v) {
     setState(() {
+      _registered = true;
       _attendanceList = v.attendeelist;
+    });
+  }
+
+  _isConfirmed() {
+    setState(() {
+      _confirmed = true;
+      _registered = true;
+    });
+  }
+
+  _isRegistered() {
+    setState(() {
+      _registered = true;
     });
   }
 
   _noAttendance() {
     setState(() {
+      _registered = false;
       _attendanceList = null;
     });
+  }
+
+  Future _checkin() async {
+    String barcode = await BarcodeScanner.scan();
+    bool validQR = QRActions.readQR(_profile.userKey, barcode, "JE", loadEvent.key);
+    if (validQR) {
+      showDialog(
+          context: context,
+          child: new AlertDialog(
+            content: new Text("Thank you for checking in!"),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ));
+    } else {
+      showDialog(
+          context: context,
+          child: new AlertDialog(
+            content: new Text("QR is invalid"),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ));
+    }
+  }
+
+  Future _checkout() async {
+    String barcode = await BarcodeScanner.scan();
+    bool validQR = QRActions.readQR(_profile.userKey, barcode, "LE", loadEvent.key);
+    if (validQR) {
+      showDialog(
+          context: context,
+          child: new AlertDialog(
+            content: new Text("Thank you for attending the event! Please don't forget to leave feedback"),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ));
+    } else {
+      showDialog(
+          context: context,
+          child: new AlertDialog(
+            content: new Text("QR is invalid"),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text('Ok'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ));
+    }
   }
 }

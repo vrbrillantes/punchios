@@ -1,31 +1,32 @@
-import 'model_question.dart';
+import 'model_feedback.dart';
 import 'model_date.dart';
+import 'model_eventdetail.dart';
 
 class ItemSession {
   final String key;
-  String name;
-  ItemDate starttime;
-  ItemDate endtime;
+  ItemEventDetails session;
+
+  List<ItemFeedback> questionlist = <ItemFeedback>[];
   String slot;
   String eventID;
-  List<Question> questionlist = <Question>[];
+  String maxPax;
 
   ItemSession.fromJson(this.key, Map data) {
     void iterateQuestions(key, value) {
-      questionlist.insert(questionlist.length, new Question.fromJson(key, value));
+      questionlist.insert(questionlist.length, new ItemFeedback.fromJson(key, value));
+//      questionlist.insert(questionlist.length, new ItemFeedback.fromJson(key, value));
+      //TODO return key
     }
 
-    name = data['Name'];
-    starttime = ItemDate.initDate(data['TimeStart']);
-    endtime = ItemDate.initDate(data['TimeEnd']);
+    session = ItemEventDetails.newItem(
+        this.key, data['Name'], ItemDate.initDate(data['TimeStart']), ItemDate.initDate(data['TimeEnd']), data['Description'], data['Venue']);
     eventID = data['EventID'];
     slot = data['Slot'];
 
-    if(data['Questions'] != null) data['Questions'].forEach(iterateQuestions);
+    if (data['Questions'] != null) data['Questions'].forEach(iterateQuestions);
   }
-  ItemSession.newSession(this.key, String name) {
-    this.name = name;
-  }
+
+  ItemSession.newSession(this.key);
 }
 
 class ListSession {
@@ -36,6 +37,7 @@ class ListSession {
     void iterateMapEntry(key, value) {
       sessionList.insert(sessionList.length, new ItemSession.fromJson(key, value));
     }
+
     data.forEach(iterateMapEntry);
   }
 }

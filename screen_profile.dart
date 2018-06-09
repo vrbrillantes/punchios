@@ -7,7 +7,7 @@ import 'model_profile.dart';
 import 'util_firebase.dart';
 import 'util_account.dart';
 import 'ui_eventbanner.dart';
-import 'screen_eventview.dart';
+import 'screen_eventView.dart';
 import 'util_preferences.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -50,9 +50,9 @@ class _ScreenProfileBuild extends State<ScreenProfileState> {
       if (p.name != null) {
         _profile = p;
         FirebaseMethods
-            .getAttendingEvents("Registrants/" + AccountUtils.getUserKey(p.email), _updateEvents)
+            .getAttendingEvents("Registrants/" + _profile.userKey, _updateEvents)
             .then((StreamSubscription s) => _subscriptionTodo = s);
-        FirebaseMethods.getCreatedEvents(_profile.email, _showMyEvents).then((StreamSubscription s) => _subscriptionTodo = s);
+        FirebaseMethods.getCreatedEvents(_profile.userKey, _showMyEvents).then((StreamSubscription s) => _subscriptionTodo = s);
       } else {
         _testSignInWithGoogle();
       }
@@ -129,7 +129,7 @@ class _ScreenProfileBuild extends State<ScreenProfileState> {
                               new ClipOval(
                                 child: new Hero(
                                   tag: "Avatar",
-                                  child: new Image.network(_profile.photo, width: 64.0),
+                                  child: new Image.network(_profile.photo),
                                 ),
                               ),
                               new Expanded(

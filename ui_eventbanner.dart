@@ -23,14 +23,14 @@ class EventBanner extends StatelessWidget {
                   ),
                   new ListTile(
                     leading: new Column(children: <Widget>[
-                      new Text(snapshot.start.shortmonth,
+                      new Text(snapshot.event.start.shortmonth,
                           textAlign: TextAlign.center,
                           style: new TextStyle(color: Colors.red)),
-                      new Text(snapshot.start.day,
+                      new Text(snapshot.event.start.day,
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.headline),
                     ]),
-                    title: new Text(snapshot.name,
+                    title: new Text(snapshot.event.name,
                         style: Theme.of(context).textTheme.title),
                     subtitle: new Text(snapshot.brief,
                         style: new TextStyle(color: Colors.grey)),

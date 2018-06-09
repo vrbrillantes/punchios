@@ -5,15 +5,22 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'model_events.dart';
 import 'model_profile.dart';
 import 'util_firebase.dart';
-import 'util_account.dart';
+import 'util_qr.dart';
 import 'util_preferences.dart';
 import 'ui_eventbanner.dart';
-import 'screen_newEvent.dart';
+import 'screen_eventCreate.dart';
 import 'screen_profile.dart';
-import 'screen_eventview.dart';
+import 'screen_eventView.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:barcode_scan/barcode_scan.dart';
+import 'ui_backdrop.dart';
+import 'package:googleapis/calendar/v3.dart' as Cal;
+import 'util_gcal.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
-final GoogleSignIn _googleSignIn = new GoogleSignIn();
+final GoogleSignIn _googleSignIn = new GoogleSignIn(
+  scopes: ['https://www.googleapis.com/auth/calendar'],
+);
 
 class ScreenHome extends StatelessWidget {
   @override
@@ -28,38 +35,74 @@ class ScreenHomeState extends StatefulWidget {
 }
 
 class _ScreenHomeBuild extends State<ScreenHomeState> {
-  ItemProfile _profile = ItemProfile.create(null, "", "");
+  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+  ItemProfile _profile = ItemProfile.create(null, "", "", "");
   StreamSubscription _subscriptionTodo;
   List<ItemEvent> _eventList = <ItemEvent>[];
-  Image _photo =  null;
+  FloatingActionButton fab;
+
+//  String barcode = "";
 
   void loggedIn(credentials) {
     setState(() {
       _profile = ItemProfile.saveCredentials(credentials);
-      _photo = new Image.network(_profile.photo);
       AppPreferences.saveLogin(_profile);
-      FirebaseMethods
-          .getPrivateEvents("Attendees/" + AccountUtils.getUserKey(credentials.currentUser.email), _eventList, _updateEvents)
-          .then((StreamSubscription s) => _subscriptionTodo = s);
+
+      _firebaseMessaging.configure(
+        onMessage: (Map<String, dynamic> message) {
+          print("onMessage: $message");
+//          _showItemDialog(message);
+        },
+        onLaunch: (Map<String, dynamic> message) {
+          print("onLaunch: $message");
+//          _navigateToItemDetail(message);
+        },
+        onResume: (Map<String, dynamic> message) {
+          print("onResume: $message");
+//          _navigateToItemDetail(message);
+        },
+      );
+      _firebaseMessaging.getToken().then((String token) {
+        assert(token != null);
+        AppPreferences.saveFCMToken(token);
+        FirebaseMethods.registerToken(token, _profile.userKey);
+      });
     });
   }
 
   @override
   void initState() {
-    AppPreferences.getLogin(_showLogin);
+    tryLogin();
+    FirebaseMethods.getPublicEvents("Public", _updateEvents).then((StreamSubscription s) => _subscriptionTodo = s);
+//    fab = new FloatingActionButton(
+//      onPressed: _readQR,
+//      child: const Icon(Icons.select_all),
+//    );
     super.initState();
   }
 
-  _showLogin(ItemProfile p) {
-    FirebaseMethods.getPublicEvents("Public", _updateEvents).then((StreamSubscription s) => _subscriptionTodo = s);
-    setState(() {
-      if (p.name != null) {
-        _profile = p;
-        _photo = new Image.network(_profile.photo);
-      } else {
-        _testSignInWithGoogle();
-      }
+  void tryLogin() async {
+    AppPreferences.getLogin((ItemProfile p) {
+      setState(() {
+        if (p.name != null) {
+          _profile = p;
+          FirebaseMethods.getAdmins(_profile.userKey, showAdmin);
+        } else {
+          _testSignInWithGoogle();
+        }
+      });
     });
+  }
+
+  void showAdmin(bool isAdmin) {
+    if (isAdmin) {
+      setState(() {
+        fab = new FloatingActionButton(
+          onPressed: _gotoScreenNewEvent,
+          child: const Icon(Icons.add),
+        );
+      });
+    }
   }
 
   @override
@@ -68,22 +111,6 @@ class _ScreenHomeBuild extends State<ScreenHomeState> {
       _subscriptionTodo.cancel();
     }
     super.dispose();
-  }
-
-  Future _gotoScreenNewEvent() async {
-    ItemEvent newEvent = await Navigator.push(
-      context,
-      new MaterialPageRoute(builder: (context) => new ScreenNewEvent()),
-    );
-    FirebaseMethods.submitEvent(newEvent);
-    print(newEvent);
-  }
-
-  void _viewProfile() {
-    Navigator.push(
-      context,
-      new MaterialPageRoute(builder: (context) => new ScreenProfile()),
-    );
   }
 
   void _testSignInWithGoogle() async {
@@ -103,42 +130,18 @@ class _ScreenHomeBuild extends State<ScreenHomeState> {
     loggedIn(_googleSignIn);
   }
 
-  void _showEventView(ItemEvent e) {
-    Navigator.push(
-      context,
-      new MaterialPageRoute(builder: (context) => new ScreenEventView(loadEvent: e)),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return new Theme(
       data: new ThemeData(
         brightness: Brightness.light,
-        platform: Theme.of(context).platform,
+        platform: Theme
+            .of(context)
+            .platform,
       ),
       child: new Stack(
         children: <Widget>[
-          new Scaffold(
-            body: new Column(
-              children: <Widget>[
-                new Container(
-                  decoration: new BoxDecoration(
-                      gradient: new LinearGradient(
-                    begin: FractionalOffset.topRight,
-                    end: FractionalOffset.bottomLeft,
-                    colors: [
-                      const Color.fromARGB(255, 59, 199, 222),
-                      const Color.fromARGB(255, 91, 134, 229),
-                    ],
-                    stops: [0.0, 1.0],
-                  )),
-                  width: 1000.0,
-                  height: 200.0,
-                ),
-              ],
-            ),
-          ),
+          new Backdrop(),
           new Scaffold(
             appBar: new AppBar(
               actions: <Widget>[
@@ -149,9 +152,8 @@ class _ScreenHomeBuild extends State<ScreenHomeState> {
                     child: new ClipOval(
                       child: new Hero(
                         tag: "Avatar",
-                        child: _photo,
+                        child: new Image.network(_profile.photo),
                       ),
-//                      child: new Image.network(_profile.photo),
                     ),
                   ),
                 )
@@ -161,11 +163,11 @@ class _ScreenHomeBuild extends State<ScreenHomeState> {
               title: new Text("PunchApp"),
             ),
             backgroundColor: const Color(0x00000000),
-//            floatingActionButton: new FloatingActionButton(onPressed: _gotoScreenNewEvent),
+            floatingActionButton: fab,
             body: new CustomScrollView(slivers: <Widget>[
               new SliverList(
                 delegate: new SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
+                      (BuildContext context, int index) {
                     return new EventBanner(
                         snapshot: _eventList[index],
                         onPressed: () {
@@ -183,8 +185,37 @@ class _ScreenHomeBuild extends State<ScreenHomeState> {
   }
 
   _updateEvents(ListEvent value) {
-    setState(() {
-      _eventList = value.eventList;
+    GoogleCalendar.eventListCheck(value.eventList, (ItemEvent el) {
+      setState(() {
+        print("adding" + el.event.name);
+        _eventList.add(el);
+      });
     });
+  }
+
+  void _viewProfile() {
+    Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => new ScreenProfile()),
+    );
+  }
+
+  void _showEventView(ItemEvent e) {
+    Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => new ScreenEventView(loadEvent: e)),
+    );
+  }
+
+  void _gotoScreenNewEvent() {
+    Navigator.push(
+      context,
+      new MaterialPageRoute(builder: (context) => new ScreenEventDetails()),
+    );
+  }
+
+  Future _readQR() async {
+    String barcode = await BarcodeScanner.scan();
+    QRActions.readQR(_profile.userKey, barcode, null, null);
   }
 }

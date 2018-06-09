@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'model_eventquestion.dart';
+import 'model_question.dart';
+import 'util_firebase.dart';
 
 class QuestionBanner extends StatelessWidget {
   QuestionBanner({this.snapshot}); // modified
@@ -16,10 +17,14 @@ class QuestionBanner extends StatelessWidget {
             isThreeLine: true,
             leading: new ClipOval(child: new Image.network(snapshot.photo)),
 //            leading: new Image.network(snapshot.photo),
-            title: new Text(snapshot.name,
-                style: Theme.of(context).textTheme.title),
-            subtitle: new Text(snapshot.question,
-                style: Theme.of(context).textTheme.body2),
+            title: new Text(snapshot.name, style: Theme.of(context).textTheme.title),
+            subtitle: new Text(snapshot.question, style: Theme.of(context).textTheme.body2),
+            trailing: new InkWell(
+              onTap: (() {
+                FirebaseMethods.projectQuestion(snapshot);
+              }),
+              child: new Icon(Icons.tv),
+            ),
           ),
         ),
       ],

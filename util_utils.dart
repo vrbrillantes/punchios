@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
+import 'dart:math';
+//TODO unused
 class _UsNumberTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -23,5 +24,17 @@ class _UsNumberTextInputFormatter extends TextInputFormatter {
       text: newText.toString(),
       selection: new TextSelection.collapsed(offset: selectionIndex),
     );
+  }
+}
+class StringUtil {
+  static String randomString(int length) {
+    var rand = new Random();
+    var codeUnits = new List.generate(
+        length,
+            (index){
+          return rand.nextInt(26);
+        }
+    );
+    return new String.fromCharCodes(codeUnits);
   }
 }
