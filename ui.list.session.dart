@@ -48,9 +48,11 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
     animation2 = Tween<double>(end: 1, begin: 0).animate(_curvedController2);
     sessionHolder.getSessions(() {
       setState(() {
-        sortedDays = days ? sessionHolder.eventSlots.values.toList() : sessionHolder.eventDays.values.toList();
-        sortedDays.sort((a, b) => a.start.datetime.compareTo(b.start.datetime));
-        changeSlot(sortedDays[0]);
+        List<dynamic> newDays = days ? sessionHolder.eventSlots.values.toList() : sessionHolder.eventDays.values.toList();
+        newDays.sort((a, b) => a.start.datetime.compareTo(b.start.datetime));
+        newDays.forEach((e) {
+          if (e.end.datetime.isAfter(DateTime.now().subtract(Duration(hours: 12))) || days) sortedDays.add(e);
+        });
       });
     });
     calendarHolder.getSessionsAttendance((SessionAttendance ss) {
@@ -166,7 +168,7 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
                     child: ListView(
                       padding: EdgeInsets.symmetric(horizontal: 18),
                       scrollDirection: Axis.horizontal,
-                      children: sortedDays.map<Widget>((e) => createMarker(e, () => changeSlot(e))).toList(), //TODO LIST SOMETHING
+                      children: sortedDays.map<Widget>((e) => createMarker(e, () => changeSlot(e))).toList(),
                     ),
                   );
           } else {
