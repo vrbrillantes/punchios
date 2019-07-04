@@ -120,29 +120,30 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
     calendarHolder.tryAttendWorkshop(ss, sss, (int i) {}, () => setState(() {}));
   }
 
-  void changeSlot(s) {
-    showSessions = <String>[];
-    setState(() {
-      s.runtimeType == Slot
-          ? sessionHolder.getSlotSessions(s).forEach((Session sss) => showSessions.add(sss.ID))
-          : sessionHolder.getDaySessions(s).forEach((Session sss) => showSessions.add(sessionAttendance.containsKey(sss.ID) ? sss.ID : null));
-      selectedName = s.ID;
-    });
-  }
-
-  SessionBrowserMarker createMarker(e, void onPressed()) {
-    return SessionBrowserMarker(
-      selected: e.ID == selectedName,
-      top: e.name,
-      bottom: "${e.start.time} - ${e.end.time}",
-      onPressed: onPressed,
-    );
-  }
+//  void changeSlot(s) {
+//    showSessions = <String>[];
+//    setState(() {
+//      s.runtimeType == Slot
+//          ? sessionHolder.getSlotSessions(s).forEach((Session sss) => showSessions.add(sss.ID))
+//          : sessionHolder.getDaySessions(s).forEach((Session sss) => showSessions.add(sessionAttendance.containsKey(sss.ID) ? sss.ID : null));
+//      selectedName = s.ID;
+//    });
+//  }
+//
+//  SessionBrowserMarker createMarker(e, void onPressed()) {
+//    return SessionBrowserMarker(
+//      selected: e.ID == selectedName,
+//      top: e.name,
+//      bottom: "${e.start.time} - ${e.end.time}",
+//      onPressed: onPressed,
+//    );
+//  }
 
   @override
   Widget build(BuildContext context) {
-    List<String> sessionKeys = days ? sessionHolder.map.keys.toList() : sessionAttendance.keys.toList();
-    sessionKeys.sort((a, b) => sessionHolder.eventSlots[sessionHolder.map[a].slotID].start.datetime.compareTo(sessionHolder.eventSlots[sessionHolder.map[b].slotID].start.datetime));
+    List<String> workshopKeys = sessionHolder.wsMap.keys.toList();
+//    List<String> sessionKeys = days ? sessionHolder.map.keys.toList() : sessionAttendance.keys.toList();
+//    sessionKeys.sort((a, b) => sessionHolder.eventSlots[sessionHolder.map[a].slotID].start.datetime.compareTo(sessionHolder.eventSlots[sessionHolder.map[b].slotID].start.datetime));
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
@@ -153,21 +154,9 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
                     margin: EdgeInsets.fromLTRB(18, 20, 18, 0),
                     child: Text("Sessions you signed up for", style: AppTextStyles.styleWhiteBold(16)),
                   );
-          } else if (index == 1) {
-            return sortedDays.length == 0
-                ? SizedBox()
-                : Container(
-                    margin: EdgeInsets.symmetric(vertical: 15),
-                    height: 44,
-                    child: ListView(
-                      padding: EdgeInsets.symmetric(horizontal: 18),
-                      scrollDirection: Axis.horizontal,
-                      children: sortedDays.map<Widget>((e) => createMarker(e, () => changeSlot(e))).toList(),
-                    ),
-                  );
           } else {
-            Workshop ss = sessionHolder.wsMap[sessionKeys[index - 2]];
-            double thisHeight = showSessions.contains(ss.ID) ? 166 : 0;
+            Workshop ss = sessionHolder.wsMap[workshopKeys[index - 1]];
+            double thisHeight =  166;
             return AnimatedContainer(
               duration: thisHeight == 0 ? Duration(seconds: 1, milliseconds: 400) : Duration(milliseconds: 900),
               curve: Curves.easeInOutCubic,
@@ -181,7 +170,7 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
             );
           }
         },
-        childCount: sessionKeys == null ? 2 : sessionKeys.length + 2,
+        childCount: workshopKeys == null ? 1 : workshopKeys.length + 1,
       ),
     );
   }

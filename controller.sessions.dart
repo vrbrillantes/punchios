@@ -13,6 +13,7 @@ class SessionsHolder {
   List<Session> daySession = <Session>[];
   List<Session> slotSession = <Session>[];
   Map<String, Slot> eventSlots = {};
+  Map<String, Track> eventTracks = {};
   Map<String, Day> eventDays = {};
 
   EventSessions sessions;
@@ -63,8 +64,11 @@ class SessionsHolder {
 
   void getSessions(void done()) {
     SessionPresenter.getSessions(eventID, (Map data) {
-      eventSlots = sessions.getEventSlots(data);
       map = sessions.getFirebaseSessions(data, eventID);
+      wsMap = sessions.getFirebaseWorkshops(data, eventID);
+
+      eventSlots = sessions.getEventSlots(data);
+      eventTracks = sessions.getEventTracks(data);
       map.values.toList().forEach((Session s) => eventSlots[s.slotID].addSession(s));
       eventDays = sessions.getEventDays(eventSlots.values.toList());
       done();

@@ -33,6 +33,8 @@ class Session {
     maxAttendees = data['Max'] == null ? 0 : data['Max'];
     description = data['Description'];
     venue = data['Venue'];
+    start = PunchDate.initDBTime(data['TimeStart']);
+    end = PunchDate.initDBTime(data['TimeEnd']);
   }
 }
 
