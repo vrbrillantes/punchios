@@ -178,6 +178,9 @@ class AttendanceHolder {
 //    sessions.registerSession(ss.slotID, ss.ID, done);
   }
 
+  void tryAttendWorkshop(Workshop ww, String status, void slotsLeft(int i), void done()) {
+
+  }
   void tryAttend(Session session, String status, void slotsLeft(int i), void done()) {
     String currentSession = sessions.mySlots[session.slotID];
     SessionAttendanceStatus slotStatus = sessions.attendance[currentSession];

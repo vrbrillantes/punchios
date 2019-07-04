@@ -9,6 +9,7 @@ class SessionsHolder {
   final BuildContext context;
 
   Map<String, Session> map = {};
+  Map<String, Workshop> wsMap = {};
   List<Session> daySession = <Session>[];
   List<Session> slotSession = <Session>[];
   Map<String, Slot> eventSlots = {};
@@ -48,6 +49,16 @@ class SessionsHolder {
                   attendance: attendance,
                   slot: eventSlots[ss.slotID],
                 )));
+  }
+  void showWorkshopScreen(Workshop ss, AttendanceHolder attendance) {
+//    Navigator.push(
+//        context,
+//        MaterialPageRoute(
+//            builder: (context) => ScreenSessionView(
+//                  session: ss,
+//                  attendance: attendance,
+//                  slot: eventSlots[ss.slotID],
+//                )));
   }
 
   void getSessions(void done()) {

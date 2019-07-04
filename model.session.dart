@@ -16,6 +16,24 @@ class Session {
     description = data['Description'];
     venue = data['Venue'];
   }
+}class Workshop {
+  final String ID;
+  final String eventID;
+  int maxAttendees;
+  String name;
+  String trackID;
+  String description;
+  String venue;
+  PunchDate start;
+  PunchDate end;
+
+  Workshop.fromFirebase(this.ID, this.eventID, data) {
+    name = data['Name'];
+    trackID = data['Track'];
+    maxAttendees = data['Max'] == null ? 0 : data['Max'];
+    description = data['Description'];
+    venue = data['Venue'];
+  }
 }
 
 class Day {
@@ -59,6 +77,20 @@ class Slot {
   }
 }
 
+class Track {
+  final String ID;
+  String name;
+  List<Workshop> trackWorkshops = <Workshop>[];
+
+  Track.fromFirebase(this.ID, data) {
+    name = data['Name'];
+  }
+
+  void addSession(Workshop ss) {
+    trackWorkshops.add(ss);
+  }
+}
+
 class EventSessions {
   Map<String, Session> getFirebaseSessions(Map data, String eventID) {
     Map<String, Session> eventSessions = {};
@@ -69,6 +101,16 @@ class EventSessions {
       });
     }
     return eventSessions;
+  }
+  Map<String, Workshop> getFirebaseWorkshops(Map data, String eventID) {
+    Map<String, Workshop> eventWorkshops = {};
+    if (data != null) {
+      data['Workshops'].forEach((kk, vv) {
+        Workshop newWorkshop = Workshop.fromFirebase(kk, eventID, vv);
+        eventWorkshops[newWorkshop.ID] = newWorkshop;
+      });
+    }
+    return eventWorkshops;
   }
 
   Map<String, Day> getEventDays(List<Slot> slots) {
@@ -91,5 +133,16 @@ class EventSessions {
       });
     }
     return eventSlots;
+  }
+
+  Map<String, Track> getEventTracks(Map data) {
+    Map<String, Track> eventTracks = {};
+    if (data != null) {
+      data['Slots'].forEach((k, v) {
+        Track newSlot = Track.fromFirebase(k, v);
+        eventTracks[k] = newSlot;
+      });
+    }
+    return eventTracks;
   }
 }

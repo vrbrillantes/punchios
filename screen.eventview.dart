@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'model.events.dart';
-import 'model.attendance.dart';
 import 'model.profile.dart';
-import 'model.participation.dart';
 
 import 'ui.backdrop.dart';
 import 'ui.eventWidgets.dart';
@@ -10,6 +8,7 @@ import 'ui.util.dart';
 import 'ui.buttons.dart';
 import 'ui.eventActions.dart';
 import 'ui.list.session.dart';
+import 'ui.list.workshops.dart';
 
 import 'util.qr.dart';
 import 'util.dialog.dart';
@@ -372,6 +371,10 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
                     sessionHolder: sessionsHolder,
                     calendarHolder: attendanceHolder,
                     isOverlaid: setOverlay,
+                  ),
+                  WorkshopView(
+                    sessionHolder: sessionsHolder,
+                    calendarHolder: attendanceHolder,
                   ),
                   EventActions2(
                     isOnline: isOnline,
