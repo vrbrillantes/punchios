@@ -293,11 +293,11 @@ class AppColors {
   static Color appColorSecondary = Color.fromARGB(255, 51, 161, 253);
   static Color appAccentYellow = Color.fromARGB(255, 253, 218, 73);
   static Color appAccentPurple = Color.fromARGB(255, 140, 82, 255);
+  static Color appAccentPurple2 = Color.fromARGB(255, 59, 53, 97);
   static Color appAccentOrange = Color.fromARGB(255, 248, 147, 31);
   static Color appAccentGreen = Color.fromARGB(255, 5, 190, 132);
   static Color appBlue = Color.fromARGB(255, 4, 150, 255);
   static Color appGreyBlue = Color.fromARGB(255, 116, 122, 155);
-
   static Color appGreyscalePlus = Color.fromARGB(255, 175, 175, 175);
   static Color appGreyscaleBaseline = Color.fromARGB(255, 152, 152, 152);
   static Color appGreyscaleMinus = Color.fromARGB(255, 93, 93, 93);
@@ -559,6 +559,14 @@ class AppTextStyles {
       fontSize: s,
       fontWeight: FontWeight.bold,
       color: AppColors.appAccentPurple,
+    );
+  }
+  static TextStyle styleDarkPurpleBold(double s) {
+    return TextStyle(
+      fontFamily: 'FSElliotPro',
+      fontSize: s,
+      fontWeight: FontWeight.bold,
+      color: AppColors.appAccentPurple2,
     );
   }
 
