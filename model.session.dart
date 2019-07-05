@@ -88,7 +88,7 @@ class Track {
     name = data['Name'];
   }
 
-  void addSession(Workshop ss) {
+  void addWorkshop(Workshop ss) {
     trackWorkshops.add(ss);
   }
 }
@@ -118,7 +118,7 @@ class EventSessions {
   Map<String, Day> getEventDays(List<Slot> slots) {
     Map<String, Day> eventDays = {};
     slots.forEach((Slot s) {
-      if (!eventDays.containsKey(s.start.simpleDate)) {
+      if (! eventDays.containsKey(s.start.simpleDate)) {
         eventDays[s.start.simpleDate] = Day.fromFirebase(s.start.simpleDate);
       }
       eventDays[s.start.simpleDate].addSlot(s);
@@ -140,7 +140,7 @@ class EventSessions {
   Map<String, Track> getEventTracks(Map data) {
     Map<String, Track> eventTracks = {};
     if (data != null) {
-      data['Slots'].forEach((k, v) {
+      data['Tracks'].forEach((k, v) {
         Track newSlot = Track.fromFirebase(k, v);
         eventTracks[k] = newSlot;
       });
