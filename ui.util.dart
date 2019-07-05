@@ -298,8 +298,10 @@ class AppColors {
   static Color appAccentGreen = Color.fromARGB(255, 5, 190, 132);
   static Color appBlue = Color.fromARGB(255, 4, 150, 255);
   static Color appGreyBlue = Color.fromARGB(255, 116, 122, 155);
+
   static Color appGreyscalePlus = Color.fromARGB(255, 175, 175, 175);
   static Color appGreyscaleBaseline = Color.fromARGB(255, 152, 152, 152);
+  static Color appGreyscaleBaselineStep = Color.fromARGB(255, 139, 139, 139);
   static Color appGreyscaleMinus = Color.fromARGB(255, 93, 93, 93);
   static Color appGreyscaleMinus2 = Color.fromARGB(255, 60, 60, 60);
   static Color appGreyscaleMinus3 = Color.fromARGB(255, 54, 53, 55);
@@ -450,6 +452,12 @@ class AppTextStyles {
     fontWeight: FontWeight.bold,
     color: AppColors.appGreyscaleBaseline,
   );
+  static TextStyle workshopTime = TextStyle(
+    fontFamily: 'FSElliotPro',
+    fontSize: 11,
+    fontWeight: FontWeight.bold,
+    color: AppColors.appGreyscaleBaselineStep,
+  );
   static TextStyle sessionVenue = TextStyle(
     fontFamily: 'FSElliotPro',
     fontSize: 14,
@@ -482,6 +490,12 @@ class AppTextStyles {
   static TextStyle bannerTitle = TextStyle(
     fontFamily: 'FSElliotPro',
     fontSize: 14,
+    fontWeight: FontWeight.bold,
+    color: AppColors.appColorMain,
+  );
+  static TextStyle workshopTitle = TextStyle(
+    fontFamily: 'FSElliotPro',
+    fontSize: 12,
     fontWeight: FontWeight.bold,
     color: AppColors.appColorMain,
   );
@@ -561,6 +575,7 @@ class AppTextStyles {
       color: AppColors.appAccentPurple,
     );
   }
+
   static TextStyle styleDarkPurpleBold(double s) {
     return TextStyle(
       fontFamily: 'FSElliotPro',

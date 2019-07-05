@@ -51,7 +51,7 @@ class SlotAttendance {
 class SessionAttendance {
   final String eventID;
   final String userKey;
-  Map<String, SessionAttendanceStatus> attendance;
+  Map<String, SessionAttendanceStatus> attendance = {};
   Map<String, String> mySlots = {};
 
   SessionAttendance(this.eventID, this.userKey);

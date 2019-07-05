@@ -69,6 +69,7 @@ class SessionsHolder {
 
       eventSlots = sessions.getEventSlots(data);
       eventTracks = sessions.getEventTracks(data);
+      wsMap.values.toList().forEach((Workshop ww) => eventTracks[ww.trackID].addWorkshop(ww));
       map.values.toList().forEach((Session s) => eventSlots[s.slotID].addSession(s));
       eventDays = sessions.getEventDays(eventSlots.values.toList());
       done();
