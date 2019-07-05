@@ -148,7 +148,9 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
   @override
   Widget build(BuildContext context) {
     List<String> sessionKeys = days ? sessionHolder.map.keys.toList() : sessionAttendance.keys.toList();
-    sessionKeys.sort((a, b) => sessionHolder.eventSlots[sessionHolder.map[a].slotID].start.datetime.compareTo(sessionHolder.eventSlots[sessionHolder.map[b].slotID].start.datetime));
+    print( "SESSION KEYS " + sessionKeys.toString());
+    if (sessionKeys.toString() == "[]")
+      sessionKeys.sort((a, b) => sessionHolder.eventSlots[sessionHolder.map[a].slotID].start.datetime.compareTo(sessionHolder.eventSlots[sessionHolder.map[b].slotID].start.datetime));
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
@@ -173,22 +175,26 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
                   );
           } else {
             Session ss = sessionHolder.map[sessionKeys[index - 2]];
-            double thisHeight = showSessions.contains(ss.ID) ? 166 : 0;
-            return AnimatedContainer(
-              duration: thisHeight == 0 ? Duration(seconds: 1, milliseconds: 400) : Duration(milliseconds: 900),
-              curve: Curves.easeInOutCubic,
-              height: thisHeight,
-              child: SessionCard(
-                slot: sessionHolder.eventSlots[ss.slotID],
-                onPressed: tryAttend,
-                onTap: () => sessionHolder.showSessionScreen(ss, calendarHolder),
-                showDetails: showExpanded,
-                session: ss,
-                attendance: sessionAttendance[ss.ID],
-              ),
-            );
+            double thisHeight = (ss != null && showSessions.contains(ss.ID)) ? 166 : 0;
+
+            return ss != null
+                ? AnimatedContainer(
+                    duration: thisHeight == 0 ? Duration(seconds: 1, milliseconds: 400) : Duration(milliseconds: 900),
+                    curve: Curves.easeInOutCubic,
+                    height: thisHeight,
+                    child: SessionCard(
+                      slot: sessionHolder.eventSlots[ss.slotID],
+                      onPressed: tryAttend,
+                      onTap: () => sessionHolder.showSessionScreen(ss, calendarHolder),
+                      showDetails: showExpanded,
+                      session: ss,
+                      attendance: sessionAttendance[ss.ID],
+                    ),
+                  )
+                : SizedBox();
           }
         },
+//        childCount: 2,
         childCount: sessionKeys == null ? 2 : sessionKeys.length + 2,
       ),
     );
