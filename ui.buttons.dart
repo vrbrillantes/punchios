@@ -24,6 +24,53 @@ class AdminActionButtons extends StatelessWidget {
   }
 }
 
+class SessionNavigationFlatButton extends StatelessWidget {
+  SessionNavigationFlatButton({this.changeView, this.buttons, this.selected});
+
+  final Function(String) changeView;
+  final List<String> buttons;
+  final String selected;
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Container(
+      padding: EdgeInsets.fromLTRB(18, 30, 18, 0),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: buttons
+            .map((String s) => Expanded(
+                child: selected == s
+                    ? Column(
+                        children: <Widget>[
+                          FlatButton(
+                            child: Text(s, style: AppTextStyles.styleWhiteBold(14)),
+                            onPressed: () {},
+                          ),
+                          Container(
+                            color: AppColors.appAccentPurple,
+                            height: 4,
+                          )
+                        ],
+                      )
+                    : Column(
+                        children: <Widget>[
+                          FlatButton(
+                            child: Text(s, style: AppTextStyles.styleWhite(14)),
+                            onPressed: () => changeView(s),
+                          ),
+                          Container(
+                            color: AppColors.appColorWhite,
+                            height: 1,
+                          )
+                        ],
+                      )))
+            .toList(),
+      ),
+    );
+  }
+}
+
 class PunchFilledFlatButton extends StatelessWidget {
   PunchFilledFlatButton({this.action, this.label, this.expanded = true, this.padded = true});
 
