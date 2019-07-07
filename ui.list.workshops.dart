@@ -21,7 +21,7 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
   final SessionsHolder sessionHolder;
   final AttendanceHolder calendarHolder;
 
-  Map<String, SessionAttendanceStatus> sessionAttendance = {};
+  Map<String, WorkshopAttendance> workshopAttendance = {};
 
   String selectedName;
 
@@ -41,7 +41,8 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
     animation2 = Tween<double>(end: 1, begin: 0).animate(_curvedController2);
     animation1 = Tween<double>(end: 0, begin: 0).animate(_curvedController2);
     sessionHolder.getSessions(() => setState(() {}));
-    calendarHolder.getSessionsAttendance((SessionAttendance ss) => setState(() => sessionAttendance = ss.attendance));
+//    calendarHolder.getWorkshopAttendance((WorkshopsAttendance ss) => setState(() {print(ss.attendance.toString());}));
+    calendarHolder.getWorkshopAttendance(() => setState(() => workshopAttendance = calendarHolder.workshopAttendance));
     super.initState();
   }
 
@@ -118,13 +119,23 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
                             style: AppTextStyles.styleDarkPurpleBold(14),
                           ),
                         ),
-                      ],),
+                      ],
+                    ),
                     onTap: () => changeMe(ss.ID),
                   ),
                   SizeTransition(
                     sizeFactor: selectedName == ss.ID ? animation2 : animation1,
                     child: Column(
-                      children: ss.trackWorkshops.map<Widget>((Workshop ww) => WorkshopCardCard(workshop: ww)).toList(),
+                      //showWorkshopScreen
+                      children: ss.trackWorkshops
+                          .map<Widget>((Workshop ww) => InkWell(
+                                child: WorkshopCardCard(
+                                  workshop: ww,
+                                  text: workshopAttendance[ww.ID] != null ? workshopAttendance[ww.ID].attendance.textStatus : "NONE",
+                                ),
+                                onTap: () => sessionHolder.showWorkshopScreen(ww, calendarHolder),
+                              ))
+                          .toList(),
                     ),
                   )
                 ],
@@ -182,7 +193,7 @@ class WorkshopCardCard extends StatelessWidget {
             child: InkWell(
                 child: Container(
                   padding: EdgeInsets.symmetric(horizontal: 23, vertical: 18),
-                  child: Text("checked-in", style: AppTextStyles.sessionStatus),
+                  child: Text(text, style: AppTextStyles.sessionStatus),
                 ),
                 onTap: onPressed),
           ),

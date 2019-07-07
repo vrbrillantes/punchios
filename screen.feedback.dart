@@ -7,49 +7,41 @@ import 'model.feedback.dart';
 import 'ui_starrating.dart';
 
 class ScreenFeedback extends StatelessWidget {
-  ScreenFeedback(
-      {this.eventKey, this.eventName, this.editable, this.session = false});
+  ScreenFeedback({this.eventKey, this.eventName, this.editable, this.session = false, this.workshop = false});
 
   final String eventKey;
   final String eventName;
+  final bool workshop;
   final bool session;
   final bool editable;
 
   @override
   Widget build(BuildContext context) {
-    return ScreenTextDialogState(
-        eventKey: eventKey,
-        eventName: eventName,
-        editable: editable,
-        session: session);
+    return ScreenTextDialogState(eventKey: eventKey, eventName: eventName, editable: editable, workshop: workshop, session: session);
   }
 }
 
 class ScreenTextDialogState extends StatefulWidget {
-  ScreenTextDialogState(
-      {this.eventKey, this.eventName, this.editable, this.session});
+  ScreenTextDialogState({this.eventKey, this.eventName, this.editable, this.session, this.workshop});
 
   final String eventKey;
   final String eventName;
   final bool editable;
+  final bool workshop;
   final bool session;
 
   @override
-  _ScreenTextDialogBuild createState() =>
-      _ScreenTextDialogBuild(
-          eventKey: eventKey,
-          eventName: eventName,
-          editable: editable,
-          session: session);
+  _ScreenTextDialogBuild createState() => _ScreenTextDialogBuild(eventKey: eventKey, eventName: eventName, editable: editable, workshop: workshop, session: session);
 }
 
 class _ScreenTextDialogBuild extends State<ScreenTextDialogState> {
-  _ScreenTextDialogBuild(
-      {this.eventKey, this.eventName, this.editable, this.session});
+  _ScreenTextDialogBuild({this.eventKey, this.eventName, this.editable, this.session, this.workshop});
 
   final String eventKey;
   final String eventName;
+
   final bool session;
+  final bool workshop;
   List<FeedbackQuestion> questionList;
   List<FeedbackQuestion> editList;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -61,7 +53,7 @@ class _ScreenTextDialogBuild extends State<ScreenTextDialogState> {
     super.initState();
     session
         ? FeedbackQuestions.forSessionsfromFirebase(eventKey, refreshLists)
-        : FeedbackQuestions.fromFirebase(eventKey, refreshLists);
+        : workshop ? FeedbackQuestions.forWorkshopsFromFirebase(eventKey, refreshLists) : FeedbackQuestions.fromFirebase(eventKey, refreshLists);
   }
 
   void refreshLists(List<FeedbackQuestion> ll) {
@@ -112,27 +104,16 @@ class _ScreenTextDialogBuild extends State<ScreenTextDialogState> {
             Scaffold(
               backgroundColor: const Color(0x00000000),
               appBar: AppBar(
-                leading: IconButton(
-                    icon: Icon(Icons.keyboard_arrow_left),
-                    onPressed: () => Navigator.pop(context)),
+                leading: IconButton(icon: Icon(Icons.keyboard_arrow_left), onPressed: () => Navigator.pop(context)),
                 backgroundColor: AppColors.appColorBackground,
                 title: Text(eventName, style: AppTextStyles.appbarTitle),
                 actions: <Widget>[
-                  editable
-                      ? IconButton(
-                      icon: Icon(editing ? Icons.save : Icons.edit),
-                      onPressed: onChangeEdit)
-                      : SizedBox(),
+                  editable ? IconButton(icon: Icon(editing ? Icons.save : Icons.edit), onPressed: onChangeEdit) : SizedBox(),
                 ],
               ),
               body: questionList == null
                   ? SizedBox()
-                  : (editing
-                  ? ReorderableListView(
-                  children:
-                  editList.map<Widget>(buildListTile).toList(),
-                  onReorder: _onReorder)
-                  : ScreenFeedbackList(questionList: questionList)),
+                  : (editing ? ReorderableListView(children: editList.map<Widget>(buildListTile).toList(), onReorder: _onReorder) : ScreenFeedbackList(questionList: questionList)),
             ),
           ],
         ));
@@ -156,8 +137,7 @@ class ScreenFeedbackListState extends StatefulWidget {
   final List<FeedbackQuestion> questionList;
 
   @override
-  _ScreenFeedbackBuild createState() =>
-      _ScreenFeedbackBuild(questionList: questionList);
+  _ScreenFeedbackBuild createState() => _ScreenFeedbackBuild(questionList: questionList);
 }
 
 class _ScreenFeedbackBuild extends State<ScreenFeedbackListState> {
@@ -212,11 +192,7 @@ class _ScreenFeedbackBuild extends State<ScreenFeedbackListState> {
       case "MS":
         return MultipleFeedback(qq, processMultiResponse);
       case "SB":
-        return Column(children: <Widget>[
-          SizedBox(height: 80),
-          PunchRaisedButton(label: "Submit", action: saveForm),
-          SizedBox(height: 20)
-        ]);
+        return Column(children: <Widget>[SizedBox(height: 80), PunchRaisedButton(label: "Submit", action: saveForm), SizedBox(height: 20)]);
       default:
         return null;
     }
@@ -279,8 +255,7 @@ class TextFeedback extends StatelessWidget {
       children: <Widget>[
         FeedbackLabel(question),
         Padding(
-          child: StyledTextFormFieldField(
-              action: onResponse, label: "", maxLines: 3),
+          child: StyledTextFormFieldField(action: onResponse, label: "", maxLines: 3),
           padding: EdgeInsets.symmetric(horizontal: 18),
         ),
       ],
@@ -295,8 +270,7 @@ class MultipleFeedback extends StatefulWidget {
   final FeedbackQuestion question;
 
   @override
-  MultipleFeedbackState createState() =>
-      MultipleFeedbackState(question, onResponse);
+  MultipleFeedbackState createState() => MultipleFeedbackState(question, onResponse);
 }
 
 class MultipleFeedbackState extends State<MultipleFeedback> {
@@ -381,8 +355,7 @@ class FeedbackLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      child: Text(label,
-          textAlign: TextAlign.start, style: AppTextStyles.styleWhiteBold(14)),
+      child: Text(label, textAlign: TextAlign.start, style: AppTextStyles.styleWhiteBold(14)),
       padding: EdgeInsets.fromLTRB(36, 54, 36, 18),
     );
   }

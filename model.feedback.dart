@@ -12,6 +12,11 @@ class FeedbackPresenter {
       if (data != null) feedbackRetrieved(data);
     });
   }
+  static void getFeedbackWorkshops(String eventID, void feedbackRetrieved(Map data)) {
+    FirebaseMethods.getWorkshopFeedbackQuestionsByEventID(eventID, (Map data) {
+      if (data != null) feedbackRetrieved(data);
+    });
+  }
 }
 
 class FeedbackQuestions {
@@ -24,7 +29,12 @@ class FeedbackQuestions {
 
   FeedbackQuestions.forSessionsfromFirebase(String eventID, void feedbackRetrieved(List<FeedbackQuestion> qq)) {
     FeedbackPresenter.getFeedbackSessions(eventID, (Map data) {
-      print(data);
+      parseFeedback(data);
+      feedbackRetrieved(parseFeedback(data));
+    });
+  }
+  FeedbackQuestions.forWorkshopsFromFirebase(String eventID, void feedbackRetrieved(List<FeedbackQuestion> qq)) {
+    FeedbackPresenter.getFeedbackWorkshops(eventID, (Map data) {
       parseFeedback(data);
       feedbackRetrieved(parseFeedback(data));
     });

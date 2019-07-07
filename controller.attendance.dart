@@ -57,14 +57,20 @@ class AttendanceHolder {
 
   GenericDialogGenerator dialog;
   String userKey;
-  Map<String, SlotAttendance> sessionAttendance = {};
+
+//  Map<String, SlotAttendance> sessionAttendance = {}; TODO SESSION ATTENDANCE IS THIS NEEDED
+  Map<String, WorkshopAttendance> workshopAttendance = {};
   bool isOnline;
   StreamSubscription _subscriptionEventAttendance;
   StreamSubscription _subscriptionSessionAttendance;
+  StreamSubscription _subscriptionWorkshopAttendance;
 
   String waitForAttendanceSessionID;
+  String waitForAttendanceWorkshopID;
 
   SessionAttendance sessions;
+  WorkshopsAttendance workshops;
+
   Attendance attendance;
 
   AttendanceHolder.newCalendarHolder(this.context, this.profile, this.event) {
@@ -87,10 +93,17 @@ class AttendanceHolder {
     });
   }
 
+  void setFeedbackWorkshop(String workshopID, void done()) {
+    AttendancePresenter.setFeedbackWorkshop(event.eventID, workshopID, userKey, (Map data) {
+//      workshops.parseAttendance(data); TODO PARSE ATTENDANCE WORKSHOP
+      done();
+    });
+//    sessions.setFeedback(slotID, done);
+  }
+
   void setFeedbackSession(String slotID, void done()) {
     AttendancePresenter.setFeedbackSession(event.eventID, slotID, userKey, (Map data) {
       sessions.parseAttendance(data);
-//      hasFeedback = true;
       done();
     });
 //    sessions.setFeedback(slotID, done);
@@ -116,13 +129,29 @@ class AttendanceHolder {
     if (_subscriptionSessionAttendance != null) _subscriptionSessionAttendance.cancel();
   }
 
+  void getWorkshopAttendance(void done()) {
+    workshops = WorkshopsAttendance(event.eventID, userKey);
+
+    if (_subscriptionWorkshopAttendance != null) _subscriptionWorkshopAttendance.cancel();
+
+    AttendancePresenter.getWorkshopAttendance(event.eventID, userKey, (Map data) {
+      workshopAttendance = workshops.parseAttendance(data);
+      if (waitForAttendanceWorkshopID != null && workshopAttendance[waitForAttendanceWorkshopID].attendance.checkedIn) {
+        waitForAttendanceWorkshopID = null;
+        Navigator.pop(context);
+        dialog.confirmDialog(dialog.checkedInString("workshop"));
+      }
+      done();
+    }, (StreamSubscription ss) => _subscriptionSessionAttendance = ss);
+  }
+
   void getSessionsAttendance(void done(SessionAttendance sa)) {
     sessions = SessionAttendance(event.eventID, userKey);
 
     if (_subscriptionSessionAttendance != null) _subscriptionSessionAttendance.cancel();
 
     AttendancePresenter.getSessionAttendance2(event.eventID, userKey, (Map data) {
-      sessionAttendance = sessions.parseAttendance(data);
+      sessions.parseAttendance(data); //TODO SESSION ATTENDANCE IS THIS NEEDED ASSIGN RETURN VALUE
       if (waitForAttendanceSessionID != null && sessions.attendance[waitForAttendanceSessionID].checkedIn) {
         waitForAttendanceSessionID = null;
         Navigator.pop(context);
@@ -153,6 +182,10 @@ class AttendanceHolder {
             }));
   }
 
+  void cancelWorkshop(String workshopID, void done()) {
+    print(workshopAttendance[workshopID]);
+  }
+
   void cancelSession(String slotID, void done()) {
     ScreenTextInit.doThis(
         context,
@@ -175,15 +208,20 @@ class AttendanceHolder {
       sessions.parseAttendance(data);
       done();
     });
-//    sessions.registerSession(ss.slotID, ss.ID, done);
   }
 
-  void tryAttendWorkshop(Workshop ww, String status, void slotsLeft(int i), void done()) {
-
+  void registerWorkshop(Workshop ss, void done()) {
+    AttendancePresenter.setWorkshopAttendance(ss.eventID, userKey, ss.ID, (Map data) {
+      workshops.parseAttendance(data);
+      done();
+    });
   }
+
+  void tryAttendWorkshop(Workshop ww, String status, void slotsLeft(int i), void done()) {}
+
   void tryAttend(Session session, String status, void slotsLeft(int i), void done()) {
     String currentSession = sessions.mySlots[session.slotID];
-    SessionAttendanceStatus slotStatus = sessions.attendance[currentSession];
+    AttendanceStatus slotStatus = sessions.attendance[currentSession];
     if (slotStatus != null) {
       if (currentSession == session.ID) {
         switch (status) {
@@ -220,6 +258,10 @@ class AttendanceHolder {
     });
   }
 
+  void checkAttendanceWorkshop(Workshop ss) {
+    AttendancePresenter.getWorkshopAttendees(event.eventID, ss.ID, (Map data) {});
+  }
+
   void checkAttendanceCheckIn(Session ss, void attendeesLeft(int i)) {
     AttendancePresenter.getSessionAttendees(event.eventID, ss.ID, ss.slotID, (Map data) {
       Map<String, int> sortedAttendees = sessions.sortedAttendees(ss.slotID, data);
@@ -230,6 +272,10 @@ class AttendanceHolder {
 
   void setAttendanceSessionSelf(String slotID, String direction, void attendanceSet()) {
     AttendancePresenter.selfSetSessionAttendance(event.eventID, userKey, slotID, direction, attendanceSet);
+  }
+
+  void checkInWorkshop(Workshop ww, String direction, int sequence) {
+    //TODO CHECK IN
   }
 
   void checkInSession(Session ss, String direction, int sequence) {
@@ -318,6 +364,10 @@ class AttendancePresenter {
     if (userKey != null) FirebaseMethods.setSessionAttendanceFeedbackSent(eventID, slotID, userKey, attendanceSet);
   }
 
+  static void setFeedbackWorkshop(String eventID, String workshopID, String userKey, void attendanceSet(Map data)) {
+    if (userKey != null) FirebaseMethods.setWorkshopAttendanceFeedbackSent(eventID, workshopID, userKey, attendanceSet);
+  }
+
   static void getSessionAttendance2(String eventID, String userID, void onData(Map data), void returnSS(StreamSubscription ss)) {
     FirebaseMethods.getSessionAttendanceByEventID2(eventID, userID, onData).then(returnSS);
   }
@@ -326,8 +376,20 @@ class AttendancePresenter {
     FirebaseMethods.getSessionsSlotsBySessionID(eventID, sessionID, slotID, done);
   }
 
+  static void getWorkshopAttendees(String eventID, String workshopID, void done(Map data)) {
+    FirebaseMethods.getWorkshopsBySessionID(eventID, workshopID, done);
+  }
+
+  static void getWorkshopAttendance(String eventID, String userID, void done(Map data), void returnSS(StreamSubscription ss)) {
+    FirebaseMethods.getWorkshopsByUserID(eventID, userID, done).then(returnSS);
+  }
+
   static void setSessionAttendance(String eventID, String userID, String slotID, String sessionID, void onData(Map data)) {
     if (userID != null) FirebaseMethods.setUserSessionAttendanceBySessionID(eventID, userID, slotID, {'SessionID': sessionID, 'Registered': DateTime.now().toString()}, onData);
+  }
+
+  static void setWorkshopAttendance(String eventID, String userID, String workshopID, void onData(Map data)) {
+    if (userID != null) FirebaseMethods.setUserWorkshopAttendanceByWorkshopID(eventID, userID, {'UserID': userID, 'WorkshopID': workshopID, 'Registered': DateTime.now().toString()}, onData);
   }
 
   static void selfSetSessionAttendance(String eventID, String userID, String slotID, String direction, void onData()) {

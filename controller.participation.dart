@@ -13,6 +13,10 @@ class ParticipationPresenter {
     Map data = {'Feedback': responseMap, 'UserID': userID, 'FeedbackKey': eventID, 'Name': name, 'Time': DateTime.now().toString()};
     if (userID != null) FirebaseMethods.setSessionFeedbackAnswers(eventID, sessionID, userID, data, feedbackSubmitted);
   }
+  static void setWorkshopAttendeeFeedback(String eventID, String workshopID, String userID, String name, List<dynamic> responseMap, void feedbackSubmitted()) {
+    Map data = {'Feedback': responseMap, 'UserID': userID, 'FeedbackKey': eventID, 'Name': name, 'Time': DateTime.now().toString()};
+    if (userID != null) FirebaseMethods.setWorkshopFeedbackAnswers(eventID, workshopID, userID, data, feedbackSubmitted);
+  }
 
   static void setKioskQuestion(String refID, String name, String question) {
     FirebaseMethods.setKioskQuestion(refID, {'Question': question, 'Name': name});
@@ -36,9 +40,10 @@ class EventParticipation {
   final Profile profile;
   final String eventID;
   final String sessionID;
+  final String workshopID;
   Map<String, Question> eventQuestions = {};
 
-  EventParticipation({this.profile, this.eventID, this.sessionID});
+  EventParticipation({this.profile, this.eventID, this.sessionID, this.workshopID});
 
   void voteQuestion(String questionid, String userid, void done()) {
     ParticipationPresenter.setVote(eventID, sessionID, questionid, userid, done);
@@ -66,6 +71,11 @@ class EventParticipation {
     List<dynamic> responseMap = <dynamic>[];
     feedback.forEach((Response r) => responseMap.add(r.responseMap));
     ParticipationPresenter.setSessionAttendeeFeedback(eventID, sessionID, profile.profileLogin.userKey, profile.name, feedback, feedbackSubmitted);
+  }
+  void sendWorkshopFeedback(List<Response> feedback, void feedbackSubmitted()) {
+    List<dynamic> responseMap = <dynamic>[];
+    feedback.forEach((Response r) => responseMap.add(r.responseMap));
+    ParticipationPresenter.setWorkshopAttendeeFeedback(eventID, workshopID, profile.profileLogin.userKey, profile.name, feedback, feedbackSubmitted);
   }
 
   void readQuestions(Map data) {

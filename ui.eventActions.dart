@@ -58,20 +58,17 @@ class EventActions extends StatelessWidget {
 class EventActions2 extends StatelessWidget {
   EventActions2({
     this.isOnline,
-    this.hasSessions,
     this.myAttendance,
     this.actionPressed,
   });
 
   final Attendance myAttendance;
-  final bool hasSessions;
   final bool isOnline;
 
   final Function(String) actionPressed;
 
   @override
   Widget build(BuildContext context) {
-    PunchOSFlatButton sessions = PunchOSFlatButton(label: "View sessions for this event", onPressed: () => actionPressed("sessions"), bold: true);
     PunchRaisedButton feedbackButton = PunchRaisedButton(label: 'Send feedback', action: () => actionPressed("feedback"));
     PunchRaisedButton questionButton = PunchRaisedButton(label: 'Ask question', action: () => actionPressed("question"));
     PunchRaisedButton checkinButton = PunchRaisedButton(label: 'Check-in', action: () => actionPressed("checkin"));
@@ -95,16 +92,14 @@ class EventActions2 extends StatelessWidget {
         (BuildContext context, int index) {
           switch (index) {
             case 0:
-              return Row(children: <Widget>[hasSessions ? sessions : SizedBox()]);
-            case 1:
               return button1;
-            case 2:
+            case 1:
               return button2;
-            case 3:
+            case 2:
               return SizedBox(height: 100);
           }
         },
-        childCount: 4,
+        childCount: 3,
       ),
     );
   }

@@ -266,6 +266,8 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
   CurvedAnimation _curvedController2;
   Animation<double> animation2;
 
+  String selectedView = "";
+
   @override
   Widget build(BuildContext context) {
     double screenSize = (MediaQuery.of(context).size.width - 36) / 9;
@@ -362,23 +364,49 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (BuildContext context, int index) {
-                        return ListBadges(badgesHolder, screenSize);
+                        void changeView(String s) {
+                          setState(() {
+                            selectedView = s;
+                          });
+                        }
+
+                        List<String> buttons = <String>[];
+
+
+                        if (badgesHolder.hasBadges()) buttons.add('Booths');
+                        if (sessionsHolder.hasSessions()) buttons.add('Sessions');
+                        if (sessionsHolder.hasWorkshops()) buttons.add('Workshops');
+                        return SessionNavigationFlatButton(
+                          changeView: changeView,
+                          buttons: buttons,
+                          selected: selectedView,
+                        );
                       },
                       childCount: 1,
                     ),
                   ),
-                  EventViewSessionsBuild(
-                    sessionHolder: sessionsHolder,
-                    calendarHolder: attendanceHolder,
-                    isOverlaid: setOverlay,
-                  ),
-                  WorkshopView(
-                    sessionHolder: sessionsHolder,
-                    calendarHolder: attendanceHolder,
-                  ),
+                  selectedView == "Sessions"
+                      ? EventViewSessionsBuild(
+                          sessionHolder: sessionsHolder,
+                          calendarHolder: attendanceHolder,
+                          isOverlaid: setOverlay,
+                          showSessionsButton: gotoSessions,
+                        )
+                      : (selectedView == "Booths"
+                          ? SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                (BuildContext context, int index) {
+                                  return ListBadges(badgesHolder, screenSize);
+                                },
+                                childCount: 1,
+                              ),
+                            )
+                          : WorkshopView(
+                              sessionHolder: sessionsHolder,
+                              calendarHolder: attendanceHolder,
+                            )),
                   EventActions2(
                     isOnline: isOnline,
-                    hasSessions: sessionsHolder.hasSessions(),
                     myAttendance: attendanceHolder.attendance,
                     actionPressed: actionPressed,
                   ),

@@ -105,8 +105,16 @@ class BadgesHolder {
   List<String> earnedBadges = <String>[];
   GenericDialogGenerator dialog;
 
+  bool hasBadges() {
+    return eventBadges.length > 0;
+  }
   BadgesHolder(this.context, this.eventID, this.userKey) {
     dialog = GenericDialogGenerator.init(context);
+
+    EventPresenter.getEventBadgesByEventID(eventID, (Map data) {
+      eventBadges = EventBadges.readBadges(data);
+//      done();
+    });
   }
 
   void getEarnedBadges(void done()) {
@@ -116,12 +124,9 @@ class BadgesHolder {
     });
   }
 
-  void getEventBadges(void done()) {
-    EventPresenter.getEventBadgesByEventID(eventID, (Map data) {
-      eventBadges = EventBadges.readBadges(data);
-      done();
-    });
-  }
+//  void getEventBadges(void done()) {
+//    print("getting badges");
+//  }
 
   void scanBadge(Badge boothID, void done()) {
     earnedBadges.contains(boothID.id)
@@ -215,6 +220,7 @@ class ParticipationHolder {
   final BuildContext context;
   final Event event;
   Session session;
+  Workshop workshop;
   final Profile profile;
   GenericDialogGenerator dialog;
 
@@ -230,6 +236,11 @@ class ParticipationHolder {
     dialog = GenericDialogGenerator.init(context);
 
     participation = EventParticipation(eventID: event.eventID, sessionID: session.ID, profile: profile);
+  }
+  ParticipationHolder.workshop(this.context, this.event, this.workshop, this.profile) {
+    dialog = GenericDialogGenerator.init(context);
+
+    participation = EventParticipation(eventID: event.eventID, workshopID: workshop.ID, profile: profile);
   }
 
   void gotoQuestions() {
@@ -255,6 +266,23 @@ class ParticipationHolder {
                 )));
     if (responseList != null)
       participation.sendSessionFeedback(responseList, () {
+        feedbackSent();
+        dialog.confirmDialog(dialog.feedbackSubmittedString);
+      });
+  }
+
+  void sendFeedbackWorkshop(bool isCollaborator, void feedbackSent()) async {
+    List<Response> responseList = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ScreenFeedback(
+                  editable: isCollaborator,
+                  eventKey: event.eventID,
+                  eventName: event.eventDetails.name,
+                  workshop: true,
+                )));
+    if (responseList != null)
+      participation.sendWorkshopFeedback(responseList, () {
         feedbackSent();
         dialog.confirmDialog(dialog.feedbackSubmittedString);
       });

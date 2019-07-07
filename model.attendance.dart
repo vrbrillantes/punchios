@@ -24,13 +24,13 @@ class Attendees {
   }
 }
 
-class SessionAttendanceStatus {
+class AttendanceStatus {
   bool checkedIn;
   bool feedback;
   bool checkedOut;
   String textStatus = "Check-in";
 
-  SessionAttendanceStatus.newStatus(Map data) {
+  AttendanceStatus.newStatus(Map data) {
     checkedIn = data.containsKey('CheckedIn') ? true : false;
     feedback = data.containsKey('Feedback') ? true : false;
     checkedOut = data.containsKey('CheckedOut') ? true : false;
@@ -43,15 +43,44 @@ class SessionAttendanceStatus {
 
 class SlotAttendance {
   final String sessionID;
-  final SessionAttendanceStatus attendance;
+  final AttendanceStatus attendance;
 
   SlotAttendance(this.sessionID, this.attendance);
+}
+
+class WorkshopAttendance {
+  final String key;
+  String workshopID;
+  AttendanceStatus attendance;
+
+  WorkshopAttendance.parseData(this.key, Map data) {
+    attendance = AttendanceStatus.newStatus(data);
+    workshopID = data['WorkshopID'];
+  }
+}
+
+class WorkshopsAttendance {
+  final String eventID;
+  final String userKey;
+
+  WorkshopsAttendance(this.eventID, this.userKey);
+
+  Map<String, WorkshopAttendance> parseAttendance(Map data) {
+    Map<String, WorkshopAttendance> attendance = {};
+    if (data != null) {
+      data.forEach((k, v) {
+        WorkshopAttendance newAtt = WorkshopAttendance.parseData(k, v);
+        attendance[newAtt.workshopID] = newAtt;
+      });
+    }
+    return attendance;
+  }
 }
 
 class SessionAttendance {
   final String eventID;
   final String userKey;
-  Map<String, SessionAttendanceStatus> attendance = {};
+  Map<String, AttendanceStatus> attendance = {};
   Map<String, String> mySlots = {};
 
   SessionAttendance(this.eventID, this.userKey);
@@ -76,9 +105,9 @@ class SessionAttendance {
       data.forEach((k, v) {
         if (v['SessionID'] != null) {
           String sessionID = v['SessionID'];
-          sessionAttendance[k] = SlotAttendance(sessionID, SessionAttendanceStatus.newStatus(v));
+          sessionAttendance[k] = SlotAttendance(sessionID, AttendanceStatus.newStatus(v));
           mySlots[k] = sessionID;
-          attendance[sessionID] = SessionAttendanceStatus.newStatus(v);
+          attendance[sessionID] = AttendanceStatus.newStatus(v);
         }
       });
     }

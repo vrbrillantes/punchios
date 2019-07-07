@@ -1,35 +1,41 @@
+import 'package:googleapis/texttospeech/v1.dart';
+
 import 'model.session.dart';
 import 'model.attendance.dart';
 import 'package:flutter/material.dart';
 import 'ui.util.dart';
 import 'controller.sessions.dart';
+import 'ui.buttons.dart';
 import 'controller.attendance.dart';
 
 class EventViewSessionsBuild extends StatefulWidget {
-  EventViewSessionsBuild({this.sessionHolder, this.calendarHolder, this.isOverlaid, this.days = false});
+  EventViewSessionsBuild({this.sessionHolder, this.calendarHolder, this.isOverlaid, this.days = false, this.showSessionsButton});
 
   final Function(bool) isOverlaid;
+  final VoidCallback showSessionsButton;
 
   final bool days;
   final SessionsHolder sessionHolder;
   final AttendanceHolder calendarHolder;
 
   @override
-  EventViewSessionState createState() => EventViewSessionState(sessionHolder: sessionHolder, calendarHolder: calendarHolder, days: days, isOverlaid: isOverlaid);
+  EventViewSessionState createState() =>
+      EventViewSessionState(sessionHolder: sessionHolder, showSessionsButton: showSessionsButton, calendarHolder: calendarHolder, days: days, isOverlaid: isOverlaid);
 }
 
 class EventViewSessionState extends State<EventViewSessionsBuild> with TickerProviderStateMixin {
-  EventViewSessionState({this.sessionHolder, this.calendarHolder, this.isOverlaid, this.days});
+  EventViewSessionState({this.sessionHolder, this.calendarHolder, this.isOverlaid, this.days, this.showSessionsButton});
 
   final bool days;
   final SessionsHolder sessionHolder;
   final AttendanceHolder calendarHolder;
 
+  final VoidCallback showSessionsButton;
   final Function(bool) isOverlaid;
   AnimationController _controller2;
   CurvedAnimation _curvedController2;
   Animation<double> animation2;
-  Map<String, SessionAttendanceStatus> sessionAttendance = {};
+  Map<String, AttendanceStatus> sessionAttendance = {};
 
   List<dynamic> sortedDays = <dynamic>[];
   List<String> showSessions = <String>[];
@@ -51,6 +57,7 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
         List<dynamic> newDays = days ? sessionHolder.eventSlots.values.toList() : sessionHolder.eventDays.values.toList();
         newDays.sort((a, b) => a.start.datetime.compareTo(b.start.datetime));
         newDays.forEach((e) {
+//          sortedDays.add(e); TODO DEBUG THINGY
           if (e.end.datetime.isAfter(DateTime.now().subtract(Duration(hours: 12))) || days) sortedDays.add(e);
         });
       });
@@ -79,7 +86,7 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
       oss = Overlay.of(context);
       oss2 = Overlay.of(context);
 
-      SessionAttendanceStatus sas = calendarHolder.sessions.attendance[ss.ID];
+      AttendanceStatus sas = calendarHolder.sessions.attendance[ss.ID];
       String text = sas == null ? "Register" : sas.textStatus;
 
       RenderBox rbb = thisKey.currentContext.findRenderObject();
@@ -148,7 +155,6 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
   @override
   Widget build(BuildContext context) {
     List<String> sessionKeys = days ? sessionHolder.map.keys.toList() : sessionAttendance.keys.toList();
-    print( "SESSION KEYS " + sessionKeys.toString());
     if (sessionKeys.toString() == "[]")
       sessionKeys.sort((a, b) => sessionHolder.eventSlots[sessionHolder.map[a].slotID].start.datetime.compareTo(sessionHolder.eventSlots[sessionHolder.map[b].slotID].start.datetime));
     return SliverList(
@@ -173,6 +179,18 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
                       children: sortedDays.map<Widget>((e) => createMarker(e, () => changeSlot(e))).toList(),
                     ),
                   );
+          } else if (index == sessionKeys.length + 2) {
+            return showSessionsButton == null
+                ? SizedBox()
+                : Row(
+                    children: <Widget>[
+                      PunchOSFlatButton(
+                        label: "View sessions for this event",
+                        onPressed: showSessionsButton,
+                        bold: true,
+                      )
+                    ],
+                  );
           } else {
             Session ss = sessionHolder.map[sessionKeys[index - 2]];
             double thisHeight = (ss != null && showSessions.contains(ss.ID)) ? 166 : 0;
@@ -195,7 +213,7 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
           }
         },
 //        childCount: 2,
-        childCount: sessionKeys == null ? 2 : sessionKeys.length + 2,
+        childCount: sessionKeys == null ? 2 : sessionKeys.length + 3,
       ),
     );
   }
@@ -302,7 +320,7 @@ class SessionCard extends StatelessWidget {
   final VoidCallback onTap;
   final Session session;
   final Slot slot;
-  final SessionAttendanceStatus attendance;
+  final AttendanceStatus attendance;
   final GlobalKey thisKey = GlobalKey();
 
   @override

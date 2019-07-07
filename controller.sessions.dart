@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:punchappflutter/screen.workshopview.dart';
 import 'controller.attendance.dart';
 import 'model.session.dart';
 import 'screen.sessionview.dart';
+import 'screen.workshopview.dart';
 import 'util.firebase.dart';
 
 class SessionsHolder {
@@ -31,6 +33,7 @@ class SessionsHolder {
     });
     return daySession;
   }
+
   List<Session> getSlotSessions(Slot e) {
     slotSession = <Session>[];
     e.slotSessions.forEach(slotSession.add);
@@ -51,16 +54,26 @@ class SessionsHolder {
                   slot: eventSlots[ss.slotID],
                 )));
   }
-  void showWorkshopScreen(Workshop ss, AttendanceHolder attendance) {
-//    Navigator.push(
-//        context,
-//        MaterialPageRoute(
-//            builder: (context) => ScreenSessionView(
-//                  session: ss,
-//                  attendance: attendance,
-//                  slot: eventSlots[ss.slotID],
-//                )));
+  void showWorkshopScreen(Workshop ww, AttendanceHolder attendance) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ScreenWorkshopView(
+                  workshop: ww,
+                  attendance: attendance,
+                )));
   }
+
+//  void showWorkshopScreen(Workshop ss, AttendanceHolder attendance) {
+////    Navigator.push(
+////        context,
+////        MaterialPageRoute(
+////            builder: (context) => ScreenSessionView(
+////                  session: ss,
+////                  attendance: attendance,
+////                  slot: eventSlots[ss.slotID],
+////                )));
+//  }
 
   void getSessions(void done()) {
     SessionPresenter.getSessions(eventID, (Map data) {
@@ -78,6 +91,10 @@ class SessionsHolder {
 
   bool hasSessions() {
     return sessions != null && map.length > 0;
+  }
+
+  bool hasWorkshops() {
+    return sessions != null && wsMap.length > 0;
   }
 }
 

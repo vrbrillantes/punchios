@@ -25,6 +25,7 @@ class EventBadges {
     List<Badge> eventBadges = <Badge>[];
     if (data != null)
       data.forEach((k, v) {
+        print(v.toString());
         eventBadges.add(Badge.fromFirebase(k, v));
       });
     return eventBadges;

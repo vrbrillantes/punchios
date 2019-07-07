@@ -31,7 +31,7 @@ class ListBadgesBuild extends State<ListBadges> with TickerProviderStateMixin {
     _curvedController2 = CurvedAnimation(parent: _controller2, curve: Curves.easeOutSine);
     animation2 = Tween<double>(end: 1, begin: 0).animate(_curvedController2);
     fanMargin = originalMargin;
-    badgesHolder.getEventBadges(() => setState(() {}));
+//    badgesHolder.getEventBadges(() => setState(() {}));
     badgesHolder.getEarnedBadges(() => setState(() {}));
     super.initState();
   }
