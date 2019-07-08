@@ -128,6 +128,7 @@ class FirebaseMethods {
     DatabaseReference mySessionAttendance = dbSessionRegistrations.child(eventID).child(userKey);
     mySessionAttendance.child(slotID).child('Feedback').set(true).whenComplete(() => mySessionAttendance.once().then((DataSnapshot ss) => onData(ss.value)));
   }
+
   static void setWorkshopAttendanceFeedbackSent(String eventID, String workshopID, String userKey, void onData(Map data)) {
 //    DatabaseReference mySessionAttendance = dbSessionRegistrations.child(eventID).child(userKey); TODO WORKSHOP ATTENDANCE
 //    mySessionAttendance.child(slotID).child('Feedback').set(true).whenComplete(() => mySessionAttendance.once().then((DataSnapshot ss) => onData(ss.value)));
@@ -136,11 +137,13 @@ class FirebaseMethods {
   static void getSessionsSlotsBySessionID(String eventID, String sessionID, String slotID, void onData(Map data)) {
     dbSessionRegistrations.child(eventID).orderByChild(slotID + "/SessionID").equalTo(sessionID).once().then((DataSnapshot ss) => onData(ss.value));
   }
+
   static void getWorkshopsBySessionID(String eventID, String workshopID, void onData(Map data)) {
-    dbWorkshopsRegistrations.child(eventID).orderByChild('WorkshopID').equalTo(workshopID).once().then((DataSnapshot ss)=>onData(ss.value));
+    dbWorkshopsRegistrations.child(eventID).orderByChild('WorkshopID').equalTo(workshopID).once().then((DataSnapshot ss) => onData(ss.value));
   }
+
   static Future<StreamSubscription<Event>> getWorkshopsByUserID(String eventID, String userID, void onData(Map data)) async {
-    return dbWorkshopsRegistrations.child(eventID).orderByChild('UserID').equalTo(userID).onValue.listen((Event e)=>onData(e.snapshot.value));
+    return dbWorkshopsRegistrations.child(eventID).orderByChild('UserID').equalTo(userID).onValue.listen((Event e) => onData(e.snapshot.value));
   }
 
   static void setSessionAttendanceByUserKey(String eventID, String userKey, String slotID, String child, String dateTime, void onData()) {
@@ -151,6 +154,7 @@ class FirebaseMethods {
     DatabaseReference mySessions = dbSessionRegistrations.child(eventID).child(userKey);
     mySessions.child(slotID).set(data).whenComplete(() => mySessions.once().then((DataSnapshot ss) => onData(ss.value)));
   }
+
   static void setUserWorkshopAttendanceByWorkshopID(String eventID, String userID, Map data, void onData(Map data)) {
     DatabaseReference myWorkshops = dbWorkshopsRegistrations.child(eventID);
     myWorkshops.push().set(data).whenComplete(() => myWorkshops.orderByChild('UserID').equalTo(userID).once().then((DataSnapshot ss) => onData(ss.value)));
@@ -159,6 +163,16 @@ class FirebaseMethods {
   static void setSessionAttendanceByAttendee(String eventID, String userKey, String slotID, Map data, void onData(Map data)) {
     DatabaseReference mySessions = dbSessionRegistrations.child(eventID).child(userKey);
     mySessions.child(slotID).set(data).whenComplete(() => mySessions.once().then((DataSnapshot ss) => onData(ss.value)));
+  }
+
+  static void setWorkshopAttendanceByAttendee(String eventID, String workshopKey, String userKey, String status, String value, void onData(Map data)) {
+    DatabaseReference myWorkshops = dbWorkshopsRegistrations.child(eventID);
+    myWorkshops.child(workshopKey).child(status).set(value).whenComplete(() => myWorkshops.orderByChild('UserID').equalTo(userKey).once().then((DataSnapshot ss) => onData(ss.value)));
+  }
+
+  static void setWorkshopCancelAttendanceByAttendee(String eventID, String workshopKey, String userKey, Map data, void onData(Map data)) {
+    DatabaseReference myWorkshops = dbWorkshopsRegistrations.child(eventID);
+    myWorkshops.child(workshopKey).set(data).whenComplete(() => myWorkshops.orderByChild('UserID').equalTo(userKey).once().then((DataSnapshot ss) => onData(ss.value)));
   }
 
   static Future<StreamSubscription<Event>> getAttendanceByUserKey(String userKey, String eventID, void onData(Map data)) async {
@@ -243,6 +257,7 @@ class FirebaseMethods {
   static void setSessionFeedbackAnswers(String eventID, String sessionID, String userKey, Map data, void onData()) {
     dbSessionFeedbackResponses.child(eventID).child(sessionID).child(userKey).set(data).whenComplete(onData);
   }
+
   static void setWorkshopFeedbackAnswers(String eventID, String workshopID, String userKey, Map data, void onData()) {
     dbWorkshopFeedbackResponses.child(eventID).child(workshopID).child(userKey).set(data).whenComplete(onData);
   }

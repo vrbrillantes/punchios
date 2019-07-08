@@ -183,7 +183,15 @@ class AttendanceHolder {
   }
 
   void cancelWorkshop(String workshopID, void done()) {
-    print(workshopAttendance[workshopID]);
+    void done(String s) {
+      AttendancePresenter.setAttendanceCancelWorkshop(event.eventID, workshopID, workshopAttendance[workshopID].key, userKey, s, (Map data) {
+        workshops.parseAttendance(data);
+        dialog.confirmDialog(dialog.attendanceCancelConfirmString);
+      });
+    }
+
+    ScreenTextInit.doThis(context, dialog.cancelString(event.eventDetails.name), done);
+    print(workshopAttendance[workshopID].key);
   }
 
   void cancelSession(String slotID, void done()) {
@@ -191,7 +199,8 @@ class AttendanceHolder {
         context,
         dialog.cancelString(event.eventDetails.name),
         (String s) => AttendancePresenter.setAttendanceCancelSession(event.eventID, slotID, s, userKey, (Map data) {
-              attendance.readAttendance(data);
+//              attendance.readAttendance(data);
+              sessions.parseAttendance(data);
               dialog.confirmDialog(dialog.attendanceCancelConfirmString);
             }));
   }
@@ -217,7 +226,19 @@ class AttendanceHolder {
     });
   }
 
-  void tryAttendWorkshop(Workshop ww, String status, void slotsLeft(int i), void done()) {}
+  void tryAttendWorkshop(Workshop ww, String status, void slotsLeft(int i), void done()) {
+    if (workshopAttendance.containsKey(ww.ID)) {
+      AttendanceStatus thisAttendance = workshopAttendance[ww.ID].attendance;
+      switch (thisAttendance.textStatus) {
+        case "Check-in":
+          checkAttendanceWorkshopCheckIn(ww, slotsLeft);
+          break;
+        case "Ready to checkout":
+          checkInWorkshop(ww, workshopAttendance[ww.ID].key, "OUT", 0);
+          break;
+      }
+    }
+  }
 
   void tryAttend(Session session, String status, void slotsLeft(int i), void done()) {
     String currentSession = sessions.mySlots[session.slotID];
@@ -259,23 +280,30 @@ class AttendanceHolder {
   }
 
   void checkAttendanceWorkshop(Workshop ss) {
-    AttendancePresenter.getWorkshopAttendees(event.eventID, ss.ID, (Map data) {});
+    AttendancePresenter.getWorkshopAttendees(event.eventID, ss.ID, (Map data) {
+      Map<String, int> sortedAttendees = workshops.sortedAttendees(ss.ID, data);
+      ss.maxAttendees < sortedAttendees[userKey]
+          ? dialog.confirmDialog(dialog.workshopWaitingListString(sortedAttendees[userKey], ss.maxAttendees))
+          : dialog.confirmDialog(dialog.workshopSuccessRegistration(ss.name));
+    });
   }
 
   void checkAttendanceCheckIn(Session ss, void attendeesLeft(int i)) {
     AttendancePresenter.getSessionAttendees(event.eventID, ss.ID, ss.slotID, (Map data) {
       Map<String, int> sortedAttendees = sessions.sortedAttendees(ss.slotID, data);
-//      attendeesLeft(sortedAttendees[userKey] - ss.maxAttendees);
       checkInSession(ss, "IN", sortedAttendees[userKey] - ss.maxAttendees); //TODO return check in
+    });
+  }
+
+  void checkAttendanceWorkshopCheckIn(Workshop ww, void attendeesLeft(int i)) {
+    AttendancePresenter.getWorkshopAttendees(ww.eventID, ww.ID, (Map data) {
+      Map<String, int> sortedAttendees = workshops.sortedAttendees(ww.ID, data);
+      checkInWorkshop(ww, workshopAttendance[ww.ID].key, "IN", sortedAttendees[userKey] - ww.maxAttendees); //TODO return check in
     });
   }
 
   void setAttendanceSessionSelf(String slotID, String direction, void attendanceSet()) {
     AttendancePresenter.selfSetSessionAttendance(event.eventID, userKey, slotID, direction, attendanceSet);
-  }
-
-  void checkInWorkshop(Workshop ww, String direction, int sequence) {
-    //TODO CHECK IN
   }
 
   void checkInSession(Session ss, String direction, int sequence) {
@@ -289,6 +317,19 @@ class AttendanceHolder {
           returnCode: (String s) => setAttendanceSessionSelf(ss.slotID, direction, () => dialog.confirmDialog(dialog.checkedInString(ss.name))),
           wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
     }, profile.profileLogin.userKey, eventID: ss.eventID, sessionID: ss.ID, waitlisted: sequence > 0);
+  }
+
+  void checkInWorkshop(Workshop ss, String attendanceKey, String direction, int sequence) {
+    waitForAttendanceSessionID = ss.ID;
+    UIElements.modalBS(context, direction, () {
+      Navigator.pop(context);
+      waitForAttendanceSessionID = null;
+//      QRActions.scanCheckInSessionSelf(
+//          direction: direction,
+//          sessionID: ss.ID,
+//          returnCode: (String s) => setAttendanceSessionSelf(ss.slotID, direction, () => dialog.confirmDialog(dialog.checkedInString(ss.name))),
+//          wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
+    }, profile.profileLogin.userKey, eventID: ss.eventID, attendanceKey: attendanceKey, waitlisted: sequence > 0);
   }
 
   void checkOut() {
@@ -354,6 +395,23 @@ class AttendancePresenter {
 
   static void setAttendanceCancelSession(String eventID, String slotID, String reason, String userKey, void attendanceCancelled(Map data)) {
     if (userKey != null) FirebaseMethods.setSessionAttendanceByAttendee(eventID, userKey, slotID, {'Reason': reason}, attendanceCancelled);
+  }
+
+  static void setAttendanceCancelWorkshop(String eventID, String workshopID, String workshopKey, String userKey, String reason, void attendanceCancelled(Map data)) {
+    if (workshopKey != null)
+      FirebaseMethods.setWorkshopCancelAttendanceByAttendee(eventID, workshopKey, userKey, {'Reason': reason, 'CancelledUser': userKey, 'CancelledWorkshop': workshopID}, attendanceCancelled);
+  }
+
+  static void setAttendanceCheckInWorkshop(String eventID, String workshopKey, String userKey, void attendanceCancelled(Map data)) {
+    if (workshopKey != null) FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'CheckedIn', DateTime.now().toString(), attendanceCancelled);
+  }
+
+  static void setAttendanceCheckOutWorkshop(String eventID, String workshopKey, String userKey, void attendanceCancelled(Map data)) {
+    if (workshopKey != null) FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'CheckedOut', DateTime.now().toString(), attendanceCancelled);
+  }
+
+  static void setAttendanceFeedbackWorkshop(String eventID, String workshopKey, String userKey, void attendanceCancelled(Map data)) {
+    if (workshopKey != null) FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'Feedback', DateTime.now().toString(), attendanceCancelled);
   }
 
   static void setFeedback(String eventID, String userKey, void attendanceSet(Map data)) {

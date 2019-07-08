@@ -388,7 +388,7 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
                   selectedView == "Sessions"
                       ? EventViewSessionsBuild(
                           sessionHolder: sessionsHolder,
-                          calendarHolder: attendanceHolder,
+                          attendanceHolder: attendanceHolder,
                           isOverlaid: setOverlay,
                           showSessionsButton: gotoSessions,
                         )

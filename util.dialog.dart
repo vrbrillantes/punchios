@@ -70,10 +70,21 @@ class GenericDialogGenerator {
         message:
             "You are registered to this session but you are on the waiting list.");
   }
+  DialogParameters workshopWaitingListString(int seq, int slot) {
+    return DialogParameters.newDialog(
+        message:
+            "You are registered to this workshop but you are on the waiting list.");
+  }
   DialogParameters sessionSuccessRegistration(String name) {
     return DialogParameters.newDialog(
         message:
             "You successfully registered to the session, $name");
+  }
+
+  DialogParameters workshopSuccessRegistration(String name) {
+    return DialogParameters.newDialog(
+        message:
+            "You successfully registered to the workshop, $name");
   }
 
   String saveEventString = "Save event for offline?";

@@ -12,6 +12,10 @@ class QRGenerator {
       {String userKey, String sessionID, String direction}) {
     return QRBuild("SA|$userKey|$sessionID|$direction");
   }
+  static Widget attendeeWorkshopQR(
+      {String userKey, String attendanceKey, String direction}) {
+    return QRBuild("WA|$userKey|$attendanceKey|$direction");
+  }
 }
 
 class QRActions {

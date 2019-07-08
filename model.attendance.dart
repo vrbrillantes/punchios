@@ -35,6 +35,7 @@ class AttendanceStatus {
     feedback = data.containsKey('Feedback') ? true : false;
     checkedOut = data.containsKey('CheckedOut') ? true : false;
 
+
     if (checkedIn) textStatus = "Checked-in";
     if (feedback) textStatus = "Ready to checkout";
     if (checkedOut) textStatus = "Checked out";
@@ -65,6 +66,19 @@ class WorkshopsAttendance {
 
   WorkshopsAttendance(this.eventID, this.userKey);
 
+  Map<String, int> sortedAttendees(String workshopID, Map data) {
+    Map<String, int> attMap = {};
+    List<SessionAttendee> attendees = <SessionAttendee>[];
+
+    data.forEach((k, v) {
+      attendees.add(SessionAttendee.newAttendee(v['UserID'], v['Registered']));
+    });
+    attendees.sort((a, b) => a.regTime.datetime.compareTo(b.regTime.datetime));
+    attendees.forEach((SessionAttendee ss) {
+      attMap[ss.attendee] = attendees.indexOf(ss) + 1;
+    });
+    return attMap;
+  }
   Map<String, WorkshopAttendance> parseAttendance(Map data) {
     Map<String, WorkshopAttendance> attendance = {};
     if (data != null) {

@@ -96,7 +96,7 @@ class _ScreenSessionsBuild extends State<ScreenSessionsState> {
 
                   EventViewSessionsBuild(
                     sessionHolder: sessions,
-                    calendarHolder: calendarHolder,
+                    attendanceHolder: calendarHolder,
                     isOverlaid: (bool s){},
                     days: true,
                   ),

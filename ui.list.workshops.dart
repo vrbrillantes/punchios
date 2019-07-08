@@ -131,7 +131,8 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
                           .map<Widget>((Workshop ww) => InkWell(
                                 child: WorkshopCardCard(
                                   workshop: ww,
-                                  text: workshopAttendance[ww.ID] != null ? workshopAttendance[ww.ID].attendance.textStatus : "NONE",
+                                  onPressed: tryAttend,
+                                  text: workshopAttendance[ww.ID] != null ? workshopAttendance[ww.ID].attendance.textStatus : "Sign-up",
                                 ),
                                 onTap: () => sessionHolder.showWorkshopScreen(ww, calendarHolder),
                               ))
@@ -154,7 +155,7 @@ class WorkshopCardCard extends StatelessWidget {
 
   final VoidCallback expand;
   final VoidCallback onTap;
-  final VoidCallback onPressed;
+  final Function(Workshop, String) onPressed;
   final bool direction;
   final Workshop workshop;
   final String text;
@@ -195,7 +196,7 @@ class WorkshopCardCard extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 23, vertical: 18),
                   child: Text(text, style: AppTextStyles.sessionStatus),
                 ),
-                onTap: onPressed),
+                onTap: () => onPressed(workshop, text)),
           ),
         ],
       ),

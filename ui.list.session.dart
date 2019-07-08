@@ -1,4 +1,3 @@
-import 'package:googleapis/texttospeech/v1.dart';
 
 import 'model.session.dart';
 import 'model.attendance.dart';
@@ -9,26 +8,26 @@ import 'ui.buttons.dart';
 import 'controller.attendance.dart';
 
 class EventViewSessionsBuild extends StatefulWidget {
-  EventViewSessionsBuild({this.sessionHolder, this.calendarHolder, this.isOverlaid, this.days = false, this.showSessionsButton});
+  EventViewSessionsBuild({this.sessionHolder, this.attendanceHolder, this.isOverlaid, this.days = false, this.showSessionsButton});
 
   final Function(bool) isOverlaid;
   final VoidCallback showSessionsButton;
 
   final bool days;
   final SessionsHolder sessionHolder;
-  final AttendanceHolder calendarHolder;
+  final AttendanceHolder attendanceHolder;
 
   @override
   EventViewSessionState createState() =>
-      EventViewSessionState(sessionHolder: sessionHolder, showSessionsButton: showSessionsButton, calendarHolder: calendarHolder, days: days, isOverlaid: isOverlaid);
+      EventViewSessionState(sessionHolder: sessionHolder, showSessionsButton: showSessionsButton, attendanceHolder: attendanceHolder, days: days, isOverlaid: isOverlaid);
 }
 
 class EventViewSessionState extends State<EventViewSessionsBuild> with TickerProviderStateMixin {
-  EventViewSessionState({this.sessionHolder, this.calendarHolder, this.isOverlaid, this.days, this.showSessionsButton});
+  EventViewSessionState({this.sessionHolder, this.attendanceHolder, this.isOverlaid, this.days, this.showSessionsButton});
 
   final bool days;
   final SessionsHolder sessionHolder;
-  final AttendanceHolder calendarHolder;
+  final AttendanceHolder attendanceHolder;
 
   final VoidCallback showSessionsButton;
   final Function(bool) isOverlaid;
@@ -62,7 +61,7 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
         });
       });
     });
-    calendarHolder.getSessionsAttendance((SessionAttendance ss) {
+    attendanceHolder.getSessionsAttendance((SessionAttendance ss) {
       setState(() {
         sessionAttendance = ss.attendance;
       });
@@ -86,7 +85,7 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
       oss = Overlay.of(context);
       oss2 = Overlay.of(context);
 
-      AttendanceStatus sas = calendarHolder.sessions.attendance[ss.ID];
+      AttendanceStatus sas = attendanceHolder.sessions.attendance[ss.ID];
       String text = sas == null ? "Register" : sas.textStatus;
 
       RenderBox rbb = thisKey.currentContext.findRenderObject();
@@ -130,7 +129,7 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
 
   void tryAttend(Session ss, String sss) async {
     if (somethingIsExpanded) hideExpanded();
-    calendarHolder.tryAttend(ss, sss, (int i) {}, () => setState(() {}));
+    attendanceHolder.tryAttend(ss, sss, (int i) {}, () => setState(() {}));
   }
 
   void changeSlot(s) {
@@ -203,7 +202,7 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
                     child: SessionCard(
                       slot: sessionHolder.eventSlots[ss.slotID],
                       onPressed: tryAttend,
-                      onTap: () => sessionHolder.showSessionScreen(ss, calendarHolder),
+                      onTap: () => sessionHolder.showSessionScreen(ss, attendanceHolder),
                       showDetails: showExpanded,
                       session: ss,
                       attendance: sessionAttendance[ss.ID],

@@ -7,8 +7,7 @@ import 'util.qr.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UIElements {
-  static void modalBS(BuildContext context, String direction, void onScan(), String userKey,
-      {String eventID, String sessionID, bool waitlisted = false}) {
+  static void modalBS(BuildContext context, String direction, void onScan(), String userKey, {String eventID, String sessionID, String attendanceKey, bool waitlisted = false}) {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
@@ -19,6 +18,7 @@ class UIElements {
             userKey: userKey,
             direction: direction,
             scanQR: onScan,
+            attendanceKey: attendanceKey,
           );
         });
   }
@@ -397,8 +397,7 @@ class EventDetailsBar extends StatelessWidget {
           child: ListTile(
             title: Text(
                 loadEvent.start.day != loadEvent.end.day
-                    ? "${loadEvent.start.longmonth} ${loadEvent.start.day}-${loadEvent.end.day}, ${loadEvent.start.longyear} " +
-                        "(${loadEvent.start.shortweekday}-${loadEvent.end.shortweekday})"
+                    ? "${loadEvent.start.longmonth} ${loadEvent.start.day}-${loadEvent.end.day}, ${loadEvent.start.longyear} " + "(${loadEvent.start.shortweekday}-${loadEvent.end.shortweekday})"
                     : "${loadEvent.start.longdate} (${loadEvent.start.shortweekday})",
                 style: AppTextStyles.eventDetails),
             leading: Image.asset('images/calendar@2x.png', height: 20),
@@ -529,9 +528,7 @@ class RelatedInfoDetailsBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: eventLinks.map<Widget>((EventLink e) {
                       return InkWell(
-                          child: Container(
-                              child: Text(e.name, style: AppTextStyles.eventLinks), padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6)),
-                          onTap: () => _launchURL(e.link));
+                          child: Container(child: Text(e.name, style: AppTextStyles.eventLinks), padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6)), onTap: () => _launchURL(e.link));
                     }).toList()),
               ),
             ],
@@ -583,9 +580,9 @@ class LikeCircle extends StatefulWidget {
   final ColorHolder cc;
 
   @override
-  _CircleBuild createState() =>
-      _CircleBuild(cc: cc, onTap: onTap, inFocus: inFocus);
+  _CircleBuild createState() => _CircleBuild(cc: cc, onTap: onTap, inFocus: inFocus);
 }
+
 class _CircleBuild extends State<LikeCircle> with TickerProviderStateMixin {
   _CircleBuild({this.cc, this.onTap, this.inFocus});
 
@@ -604,15 +601,11 @@ class _CircleBuild extends State<LikeCircle> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 600));
-    _curvedController =
-        CurvedAnimation(parent: _controller, curve: Curves.elasticOut);
+    _controller = AnimationController(vsync: this, duration: Duration(milliseconds: 600));
+    _curvedController = CurvedAnimation(parent: _controller, curve: Curves.elasticOut);
     animation = Tween<double>(end: 1, begin: 0).animate(_curvedController);
-    _controller2 =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 600));
-    _curvedController2 =
-        CurvedAnimation(parent: _controller2, curve: Curves.easeInOutQuint);
+    _controller2 = AnimationController(vsync: this, duration: Duration(milliseconds: 600));
+    _curvedController2 = CurvedAnimation(parent: _controller2, curve: Curves.easeInOutQuint);
     animation2 = Tween<double>(end: 1, begin: 0).animate(_curvedController2);
     _controller.forward(from: 0);
   }
@@ -642,12 +635,10 @@ class _CircleBuild extends State<LikeCircle> with TickerProviderStateMixin {
 //                transform: Matrix4.diagonal3Values(1, 1, 1),
                 child: Card(
                   margin: EdgeInsets.all(0),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(32)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
                   child: Container(
                     height: animation2.value * widgetSize,
-                    width: animation2.value * widgetSize * 2 -
-                        animation2.value * widgetSize / 2,
+                    width: animation2.value * widgetSize * 2 - animation2.value * widgetSize / 2,
                   ),
                   color: cc.color,
                 ),
@@ -669,7 +660,6 @@ class _CircleBuild extends State<LikeCircle> with TickerProviderStateMixin {
             );
           },
         ),
-
         AnimatedBuilder(
           animation: _controller,
           builder: (context, anim) {
@@ -709,6 +699,7 @@ class ColorHolder {
 
   const ColorHolder({this.color, this.name, this.cmyk, this.rgbval, this.hex});
 }
+
 class NotificationIcon extends StatelessWidget {
   NotificationIcon({this.unreadNotifications, this.showNotifications});
 
@@ -731,12 +722,13 @@ class NotificationIcon extends StatelessWidget {
 }
 
 class CheckInWidget extends StatelessWidget {
-  CheckInWidget({this.eventID, this.sessionID, this.direction, this.userKey, this.scanQR, this.waitlisted});
+  CheckInWidget({this.eventID, this.sessionID, this.direction, this.userKey, this.scanQR, this.waitlisted, this.attendanceKey});
 
   final String sessionID;
   final String eventID;
   final String direction;
   final String userKey;
+  final String attendanceKey;
   final bool waitlisted;
   final VoidCallback scanQR;
 
@@ -763,15 +755,17 @@ class CheckInWidget extends StatelessWidget {
                 ),
               )
             : Container(
-          width: 200,
-          child: Text(
-            direction == "IN" ? "Present your QR code to the usher to check-in" : "Present your QR code to the usher to checkout",
-            style: AppTextStyles.qrDialog,
-            textAlign: TextAlign.center,
-          ),
-        ),
+                width: 200,
+                child: Text(
+                  direction == "IN" ? "Present your QR code to the usher to check-in" : "Present your QR code to the usher to checkout",
+                  style: AppTextStyles.qrDialog,
+                  textAlign: TextAlign.center,
+                ),
+              ),
         sessionID == null
-            ? QRGenerator.attendeeEventQR(eventID: eventID, userKey: userKey, direction: direction)
+            ? (attendanceKey == null
+                ? QRGenerator.attendeeEventQR(eventID: eventID, userKey: userKey, direction: direction)
+                : QRGenerator.attendeeWorkshopQR(attendanceKey: attendanceKey, userKey: userKey, direction: direction))
             : QRGenerator.attendeeSessionQR(sessionID: sessionID, userKey: userKey, direction: direction),
         FlatButton(
           onPressed: scanQR,

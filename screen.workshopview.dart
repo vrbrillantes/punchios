@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'controller.attendance.dart';
-import 'controller.calendar.dart';
 import 'util.dialog.dart';
 import 'model.session.dart';
 import 'controller.events.dart';
@@ -14,7 +13,6 @@ class ScreenWorkshopView extends StatelessWidget {
 
   final AttendanceHolder attendance;
   final Workshop workshop;
-
 
   @override
   Widget build(BuildContext context) {
@@ -76,11 +74,12 @@ class _ScreenWorkshopViewBuild extends State<ScreenWorkshopViewState> {
       else if (attendance.workshopAttendance[workshop.ID].attendance.feedback)
         return PunchRaisedButton(
           label: "Check out",
-          action: () => attendance.checkInWorkshop(workshop, "OUT", 0),
+          action: () => attendance.checkInWorkshop(workshop, attendance.workshopAttendance[workshop.ID].key, "OUT", 0),
         );
       else if (attendance.workshopAttendance[workshop.ID].attendance.checkedIn && isQuestionTime)
         return PunchRaisedButton(label: "Ask a question", action: showQA);
-      else if (!attendance.workshopAttendance[workshop.ID].attendance.checkedIn) return PunchOutlineButton(label: "Cancel", action: () => attendance.cancelWorkshop(workshop.ID, () {}));
+      else if (!attendance.workshopAttendance[workshop.ID].attendance.checkedIn)
+        return PunchOutlineButton(label: "Cancel", action: () => attendance.cancelWorkshop(workshop.ID, () => setState(() {})));
     }
     return SizedBox();
   }
@@ -95,7 +94,6 @@ class _ScreenWorkshopViewBuild extends State<ScreenWorkshopViewState> {
                 })));
   }
 
-
   Widget secondButton() {
     if (attendance.workshopAttendance.containsKey(workshop.ID)) {
       if (attendance.workshopAttendance[workshop.ID].attendance.checkedIn && isFeedbackTime && !attendance.workshopAttendance[workshop.ID].attendance.feedback)
@@ -104,7 +102,7 @@ class _ScreenWorkshopViewBuild extends State<ScreenWorkshopViewState> {
           action: () => pp.sendFeedbackWorkshop(
               false,
               () => attendance.setFeedbackWorkshop(
-                workshop.ID,
+                    workshop.ID,
                     () => setState(() {}),
                   )),
         );
@@ -162,7 +160,6 @@ class _ScreenWorkshopViewBuild extends State<ScreenWorkshopViewState> {
                                   ],
                                 ),
                               ),
-
                               attendance.workshopAttendance.containsKey(workshop.ID)
                                   ? Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 22, vertical: 6),
