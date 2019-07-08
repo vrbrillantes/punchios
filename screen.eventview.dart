@@ -218,7 +218,9 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
         context: context,
         builder: (BuildContext context) {
           return CheckedInList(
-            collabs: eventAttendees.attendees.scannedAttendees.keys.map((v) => v.toString() + " " + eventAttendees.attendees.scannedAttendees[v]['direction']).toList(),
+            collabs: eventAttendees.attendees.scannedAttendees.keys
+                .map((v) => v.toString() + " " + eventAttendees.attendees.scannedAttendees[v]['direction'])
+                .toList(),
           );
         });
   }
@@ -238,7 +240,8 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
 
   void scanAttendeeSession() {
     QRActions.scanCheckInAttendeeSession(
-        returnCode: (userKey, sessionID, dir) => eventAttendees.checkInSession(sessionsHolder.map[sessionID].slotID, userKey, dir, isOnline, (bool s) {
+        returnCode: (userKey, sessionID, dir) =>
+            eventAttendees.checkInSession(sessionsHolder.map[sessionID].slotID, userKey, dir, isOnline, (bool s) {
               if (s) dialog.confirmDialog(dir == "IN" ? dialog.checkedInAttendeeString : dialog.checkOutAttendeeString);
             }),
         wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
@@ -372,7 +375,6 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
 
                         List<String> buttons = <String>[];
 
-
                         if (badgesHolder.hasBadges()) buttons.add('Booths');
                         if (sessionsHolder.hasSessions()) buttons.add('Sessions');
                         if (sessionsHolder.hasWorkshops()) buttons.add('Workshops');
@@ -401,10 +403,17 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
                                 childCount: 1,
                               ),
                             )
-                          : WorkshopView(
-                              sessionHolder: sessionsHolder,
-                              calendarHolder: attendanceHolder,
-                            )),
+                          : (selectedView == "Workshops"
+                              ? WorkshopView(
+                                  sessionHolder: sessionsHolder,
+                                  calendarHolder: attendanceHolder,
+                                )
+                              : SliverList(
+                                  delegate: SliverChildBuilderDelegate(
+                                    (BuildContext context, int index) => SizedBox(),
+                                    childCount: 1,
+                                  ),
+                                ))),
                   EventActions2(
                     isOnline: isOnline,
                     myAttendance: attendanceHolder.attendance,
