@@ -302,9 +302,9 @@ class AttendanceHolder {
     });
   }
 
-  void setAttendanceSessionSelf(String slotID, String direction, void attendanceSet()) {
-    AttendancePresenter.selfSetSessionAttendance(event.eventID, userKey, slotID, direction, attendanceSet);
-  }
+//  void setAttendanceSessionSelf(String slotID, String direction, void attendanceSet()) {
+//    AttendancePresenter.selfSetSessionAttendance(event.eventID, userKey, slotID, direction, attendanceSet);
+//  }
 
   void checkInSession(Session ss, String direction, int sequence) {
     waitForAttendanceSessionID = ss.ID;
@@ -314,7 +314,8 @@ class AttendanceHolder {
       QRActions.scanCheckInSessionSelf(
           direction: direction,
           sessionID: ss.ID,
-          returnCode: (String s) => setAttendanceSessionSelf(ss.slotID, direction, () => dialog.confirmDialog(dialog.checkedInString(ss.name))),
+          returnCode: (String s) => AttendancePresenter.selfSetSessionAttendance(
+              event.eventID, userKey, ss.slotID, direction, () => dialog.confirmDialog(dialog.checkedInString(ss.name))),
           wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
     }, profile.profileLogin.userKey, eventID: ss.eventID, sessionID: ss.ID, waitlisted: sequence > 0);
   }
@@ -324,11 +325,12 @@ class AttendanceHolder {
     UIElements.modalBS(context, direction, () {
       Navigator.pop(context);
       waitForAttendanceSessionID = null;
-//      QRActions.scanCheckInSessionSelf(
-//          direction: direction,
-//          sessionID: ss.ID,
-//          returnCode: (String s) => setAttendanceSessionSelf(ss.slotID, direction, () => dialog.confirmDialog(dialog.checkedInString(ss.name))),
-//          wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
+      QRActions.scanCheckInWorkshopSelf(
+          direction: direction,
+          workshopID: ss.ID,
+          returnCode: (String s) => AttendancePresenter.setAttendanceCheckInWorkshop(
+              event.eventID, attendanceKey, userKey, (data) => dialog.confirmDialog(dialog.checkedInString(ss.name))),
+          wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
     }, profile.profileLogin.userKey, eventID: ss.eventID, attendanceKey: attendanceKey, waitlisted: sequence > 0);
   }
 
@@ -382,7 +384,8 @@ class AttendancePresenter {
   }
 
   static void setAttendance(bool checkedIn, String eventID, String userKey, void attendanceSet(Map data)) {
-    if (userKey != null) FirebaseMethods.setAttendanceByAttendee(eventID, userKey, {'Status': checkedIn, 'Time': DateTime.now().toString()}, attendanceSet);
+    if (userKey != null)
+      FirebaseMethods.setAttendanceByAttendee(eventID, userKey, {'Status': checkedIn, 'Time': DateTime.now().toString()}, attendanceSet);
   }
 
   static void checkout(String eventID, String userKey, void attendanceSet(Map data)) {
@@ -397,21 +400,26 @@ class AttendancePresenter {
     if (userKey != null) FirebaseMethods.setSessionAttendanceByAttendee(eventID, userKey, slotID, {'Reason': reason}, attendanceCancelled);
   }
 
-  static void setAttendanceCancelWorkshop(String eventID, String workshopID, String workshopKey, String userKey, String reason, void attendanceCancelled(Map data)) {
+  static void setAttendanceCancelWorkshop(
+      String eventID, String workshopID, String workshopKey, String userKey, String reason, void attendanceCancelled(Map data)) {
     if (workshopKey != null)
-      FirebaseMethods.setWorkshopCancelAttendanceByAttendee(eventID, workshopKey, userKey, {'Reason': reason, 'CancelledUser': userKey, 'CancelledWorkshop': workshopID}, attendanceCancelled);
+      FirebaseMethods.setWorkshopCancelAttendanceByAttendee(
+          eventID, workshopKey, userKey, {'Reason': reason, 'CancelledUser': userKey, 'CancelledWorkshop': workshopID}, attendanceCancelled);
   }
 
   static void setAttendanceCheckInWorkshop(String eventID, String workshopKey, String userKey, void attendanceCancelled(Map data)) {
-    if (workshopKey != null) FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'CheckedIn', DateTime.now().toString(), attendanceCancelled);
+    if (workshopKey != null)
+      FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'CheckedIn', DateTime.now().toString(), attendanceCancelled);
   }
 
   static void setAttendanceCheckOutWorkshop(String eventID, String workshopKey, String userKey, void attendanceCancelled(Map data)) {
-    if (workshopKey != null) FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'CheckedOut', DateTime.now().toString(), attendanceCancelled);
+    if (workshopKey != null)
+      FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'CheckedOut', DateTime.now().toString(), attendanceCancelled);
   }
 
   static void setAttendanceFeedbackWorkshop(String eventID, String workshopKey, String userKey, void attendanceCancelled(Map data)) {
-    if (workshopKey != null) FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'Feedback', DateTime.now().toString(), attendanceCancelled);
+    if (workshopKey != null)
+      FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'Feedback', DateTime.now().toString(), attendanceCancelled);
   }
 
   static void setFeedback(String eventID, String userKey, void attendanceSet(Map data)) {
@@ -443,14 +451,20 @@ class AttendancePresenter {
   }
 
   static void setSessionAttendance(String eventID, String userID, String slotID, String sessionID, void onData(Map data)) {
-    if (userID != null) FirebaseMethods.setUserSessionAttendanceBySessionID(eventID, userID, slotID, {'SessionID': sessionID, 'Registered': DateTime.now().toString()}, onData);
+    if (userID != null)
+      FirebaseMethods.setUserSessionAttendanceBySessionID(
+          eventID, userID, slotID, {'SessionID': sessionID, 'Registered': DateTime.now().toString()}, onData);
   }
 
   static void setWorkshopAttendance(String eventID, String userID, String workshopID, void onData(Map data)) {
-    if (userID != null) FirebaseMethods.setUserWorkshopAttendanceByWorkshopID(eventID, userID, {'UserID': userID, 'WorkshopID': workshopID, 'Registered': DateTime.now().toString()}, onData);
+    if (userID != null)
+      FirebaseMethods.setUserWorkshopAttendanceByWorkshopID(
+          eventID, userID, {'UserID': userID, 'WorkshopID': workshopID, 'Registered': DateTime.now().toString()}, onData);
   }
 
   static void selfSetSessionAttendance(String eventID, String userID, String slotID, String direction, void onData()) {
-    if (userID != null) FirebaseMethods.setSessionAttendanceByUserKey(eventID, userID, slotID, direction == "IN" ? "CheckedIn" : "CheckedOut", DateTime.now().toString(), onData);
+    if (userID != null)
+      FirebaseMethods.setSessionAttendanceByUserKey(
+          eventID, userID, slotID, direction == "IN" ? "CheckedIn" : "CheckedOut", DateTime.now().toString(), onData);
   }
 }

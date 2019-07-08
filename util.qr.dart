@@ -66,6 +66,21 @@ class QRActions {
       wrongQR: wrongQR,
     );
   }
+  static void scanCheckInWorkshopSelf(
+      {String direction,
+      String workshopID,
+      void returnCode(String s),
+      void wrongQR()}) {
+    scanQR(
+      qrType: "SW",
+      returnCode: (List<String> s) {
+        workshopID != s[1]
+            ? wrongQR()
+            : direction != s[2] ? wrongQR() : returnCode(s[1]);
+      },
+      wrongQR: wrongQR,
+    );
+  }
 
   static void scanCheckOutSessionSelf(
       {String sessionID, void returnCode(String s), void wrongQR()}) {
