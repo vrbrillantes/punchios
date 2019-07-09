@@ -1,29 +1,6 @@
 import 'model.date.dart';
 import 'model.profile.dart';
 
-class Attendees {
-  int checkedInAttendeeCount = 0;
-  int regAttendeeCount = 0;
-
-  Map<dynamic, dynamic> scannedAttendees = {};
-
-  void readScanned(Map<dynamic, dynamic> sa) {
-    scannedAttendees = sa;
-  }
-
-  Attendees();
-
-  void parseAttendanceStats(Map data) {
-    regAttendeeCount = data['AttendeeRegistered'];
-    checkedInAttendeeCount = data['AttendeeCheckedIn'];
-  }
-
-  Map<dynamic, dynamic> addScannedAttendee(String userKey, String direction) {
-    scannedAttendees[userKey] = {'time': DateTime.now().toString(), 'direction': direction};
-    return scannedAttendees;
-  }
-}
-
 class AttendanceStatus {
   bool checkedIn;
   bool feedback;

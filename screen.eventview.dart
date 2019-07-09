@@ -218,8 +218,8 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
         context: context,
         builder: (BuildContext context) {
           return CheckedInList(
-            collabs: eventAttendees.attendees.scannedAttendees.keys
-                .map((v) => v.toString() + " " + eventAttendees.attendees.scannedAttendees[v]['direction'])
+            collabs: eventAttendees.scannedAttendees.keys
+                .map((v) => v.toString() + " " + eventAttendees.scannedAttendees[v]['direction'])
                 .toList(),
           );
         });
@@ -342,7 +342,7 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: <Widget>[
-                                        AttendeesDetailsBar(loadEvent: loadEvent, eventAttendees: eventAttendees.attendees.regAttendeeCount),
+                                        AttendeesDetailsBar(loadEvent: loadEvent, eventAttendees: eventAttendees.regAttendeeCount),
                                         Padding(
                                           padding: EdgeInsets.all(18),
                                           child: Text(loadEvent.eventDetails.longDescription, style: AppTextStyles.eventDetailsGrey),

@@ -297,8 +297,10 @@ class AppColors {
   static Color appAccentOrange = Color.fromARGB(255, 248, 147, 31);
   static Color appAccentGreen = Color.fromARGB(255, 5, 190, 132);
   static Color appBlue = Color.fromARGB(255, 4, 150, 255);
+  static Color appTeal = Color.fromARGB(255, 5, 190, 132);
   static Color appGreyBlue = Color.fromARGB(255, 116, 122, 155);
 
+  static Color appGreyscalePlus2 = Color.fromARGB(255, 198, 198, 198);
   static Color appGreyscalePlus = Color.fromARGB(255, 175, 175, 175);
   static Color appGreyscaleBaseline = Color.fromARGB(255, 152, 152, 152);
   static Color appGreyscaleBaselineStep = Color.fromARGB(255, 139, 139, 139);

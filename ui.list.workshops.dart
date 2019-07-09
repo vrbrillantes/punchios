@@ -25,15 +25,6 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
 
   String selectedName;
 
-//  List<dynamic> sortedDays = <dynamic>[];
-//  List<String> showSessions = <String>[];
-//
-//  OverlayState oss;
-//  OverlayState oss2;
-//  OverlayEntry overlayEntry;
-//  OverlayEntry overlayEntry2;
-//  bool somethingIsExpanded = false;
-
   @override
   void initState() {
     _controller2 = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
@@ -78,6 +69,87 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
   @override
   Widget build(BuildContext context) {
     List<String> tracks = sessionHolder.eventTracks.keys.toList();
+    Widget createBadge(Track e) {
+      int maxCompletion = 0;
+      int potentialCompletion = 0;
+      int actualCompletion = 0;
+      e.trackWorkshops.forEach((Workshop ww) {
+        maxCompletion += ww.weight;
+        if (workshopAttendance.containsKey(ww.ID)) {
+          potentialCompletion += ww.weight;
+          if (workshopAttendance[ww.ID].attendance.checkedIn) actualCompletion += ww.weight;
+        }
+      });
+      return Stack(
+        overflow: Overflow.visible,
+        children: <Widget>[
+          Container(width: 90),
+          Positioned(
+            top: 2.5,
+            left: 17.5,
+            child: SizedBox(
+              height: 55,
+              width: 55,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(AppColors.appGreyscalePlus2),
+//                valueColor: AlwaysStoppedAnimation(badgesHolder.eventBadges.length == badgesHolder.earnedBadges.length ? AppColors.appAccentGreen : AppColors.appAccentOrange),
+                strokeWidth: 5,
+                value: 1,
+              ),
+            ),
+          ),
+          Positioned(
+            top: 2.5,
+            left: 17.5,
+            child: SizedBox(
+              height: 55,
+              width: 55,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(AppColors.appAccentYellow),
+//                valueColor: AlwaysStoppedAnimation(badgesHolder.eventBadges.length == badgesHolder.earnedBadges.length ? AppColors.appAccentGreen : AppColors.appAccentOrange),
+                strokeWidth: 5,
+                value: 0.04 + (potentialCompletion/maxCompletion),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 2.5,
+            left: 17.5,
+            child: SizedBox(
+              height: 55,
+              width: 55,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(AppColors.appTeal),
+//                valueColor: AlwaysStoppedAnimation(badgesHolder.eventBadges.length == badgesHolder.earnedBadges.length ? AppColors.appAccentGreen : AppColors.appAccentOrange),
+                strokeWidth: 5,
+                value: 0.02 + (actualCompletion/maxCompletion),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 7.5,
+            left: 22.5,
+            child: ClipOval(
+              clipBehavior: Clip.antiAlias,
+              child: Container(
+                height: 45,
+                child: e.image,
+                width: 45,
+              ),
+            ),
+          ),
+          Positioned(
+              top: 75,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[Text(e.name, style: AppTextStyles.styleWhite(14))],
+              )),
+        ],
+      );
+    }
+
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
@@ -86,10 +158,29 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
                 ? SizedBox()
                 : Container(
                     margin: EdgeInsets.fromLTRB(18, 20, 18, 0),
-                    child: Text("Sessions you signed up for", style: AppTextStyles.styleWhiteBold(16)),
+                    child: Text("Badges earned", style: AppTextStyles.styleWhiteBold(16)),
+                  );
+          } else if (index == 1) {
+            return tracks.length == 0
+                ? SizedBox()
+                : Container(
+                    margin: EdgeInsets.symmetric(vertical: 30),
+                    height: 60,
+                    child: ListView(
+                      padding: EdgeInsets.symmetric(horizontal: 18),
+                      scrollDirection: Axis.horizontal,
+                      children: sessionHolder.eventTracks.values.map<Widget>(createBadge).toList(),
+                    ),
+                  );
+          } else if (index == 2) {
+            return tracks.length == 0
+                ? SizedBox()
+                : Container(
+                    margin: EdgeInsets.fromLTRB(18, 40, 18, 20),
+                    child: Text("Categories (${sessionHolder.eventTracks.length})", style: AppTextStyles.styleWhiteBold(16)),
                   );
           } else {
-            Track ss = sessionHolder.eventTracks[tracks[index - 1]];
+            Track ss = sessionHolder.eventTracks[tracks[index - 3]];
             return Card(
               margin: EdgeInsets.symmetric(vertical: 9, horizontal: 18),
               child: Column(
@@ -144,7 +235,7 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
             );
           }
         },
-        childCount: tracks == null ? 1 : tracks.length + 1,
+        childCount: tracks == null ? 3 : tracks.length + 3,
       ),
     );
   }

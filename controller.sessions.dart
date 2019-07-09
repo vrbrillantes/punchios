@@ -64,17 +64,6 @@ class SessionsHolder {
                 )));
   }
 
-//  void showWorkshopScreen(Workshop ss, AttendanceHolder attendance) {
-////    Navigator.push(
-////        context,
-////        MaterialPageRoute(
-////            builder: (context) => ScreenSessionView(
-////                  session: ss,
-////                  attendance: attendance,
-////                  slot: eventSlots[ss.slotID],
-////                )));
-//  }
-
   void getSessions(void done()) {
     SessionPresenter.getSessions(eventID, (Map data) {
       map = sessions.getFirebaseSessions(data, eventID);

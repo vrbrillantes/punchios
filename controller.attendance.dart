@@ -16,34 +16,41 @@ import 'util.preferences.dart';
 class AttendeeHolder {
   final String eventID;
 
+  Map<dynamic, dynamic> scannedAttendees = {};
+  int checkedInAttendeeCount = 0;
+  int regAttendeeCount = 0;
   AttendeeHolder.init(this.eventID) {
-    AttendancePresenter.getScannedAttendees(eventID, (Map<dynamic, dynamic> atd) {
-      attendees.readScanned(atd);
-    });
+    AttendancePresenter.getScannedAttendees(eventID, (Map<dynamic, dynamic> atd) =>scannedAttendees = atd);
   }
-
-  Attendees attendees = Attendees();
 
   void checkIn(String userKey, bool isOnline, void checkInResult(bool r)) {
     isOnline
         ? AttendancePresenter.setAttendance(true, eventID, userKey, (Map data) => checkInResult(data['Status']))
-        : AttendancePresenter.setScannedAttendees(eventID, attendees.addScannedAttendee(userKey, "IN"));
+        : AttendancePresenter.setScannedAttendees(eventID, addScannedAttendee(userKey, "IN"));
   }
 
   void checkInSession(String slotID, String userKey, String direction, bool isOnline, void checkInResult(bool r)) {
     isOnline ? AttendancePresenter.selfSetSessionAttendance(eventID, userKey, slotID, direction, () {}) : print("DO THIS"); //TODO WSS
   }
 
+  Map<dynamic, dynamic> addScannedAttendee(String userKey, String direction) {
+    scannedAttendees[userKey] = {'time': DateTime.now().toString(), 'direction': direction};
+    return scannedAttendees;
+  }
   void checkOut(String userKey, bool isOnline, void checkInResult(bool r)) {
     isOnline
         ? AttendancePresenter.checkout(eventID, userKey, (Map data) => checkInResult(data['Checkout']))
-        : AttendancePresenter.setScannedAttendees(eventID, attendees.addScannedAttendee(userKey, "OUT"));
+        : AttendancePresenter.setScannedAttendees(eventID, addScannedAttendee(userKey, "OUT"));
   }
 
   void getFirebase(bool isOnline, void attendeesRetrieved()) {
     if (isOnline) {
       AttendancePresenter.getAttendanceStats(eventID, (Map data) {
-        if (data != null) attendees.parseAttendanceStats(data);
+        if (data != null) {
+
+          regAttendeeCount = data['AttendeeRegistered'];
+          checkedInAttendeeCount = data['AttendeeCheckedIn'];
+        }
         attendeesRetrieved();
       });
     }
@@ -314,8 +321,7 @@ class AttendanceHolder {
       QRActions.scanCheckInSessionSelf(
           direction: direction,
           sessionID: ss.ID,
-          returnCode: (String s) => AttendancePresenter.selfSetSessionAttendance(
-              event.eventID, userKey, ss.slotID, direction, () => dialog.confirmDialog(dialog.checkedInString(ss.name))),
+          returnCode: (String s) => AttendancePresenter.selfSetSessionAttendance(event.eventID, userKey, ss.slotID, direction, () => dialog.confirmDialog(dialog.checkedInString(ss.name))),
           wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
     }, profile.profileLogin.userKey, eventID: ss.eventID, sessionID: ss.ID, waitlisted: sequence > 0);
   }
@@ -328,8 +334,7 @@ class AttendanceHolder {
       QRActions.scanCheckInWorkshopSelf(
           direction: direction,
           workshopID: ss.ID,
-          returnCode: (String s) => AttendancePresenter.setAttendanceCheckInWorkshop(
-              event.eventID, attendanceKey, userKey, (data) => dialog.confirmDialog(dialog.checkedInString(ss.name))),
+          returnCode: (String s) => AttendancePresenter.setAttendanceCheckInWorkshop(event.eventID, attendanceKey, userKey, (data) => dialog.confirmDialog(dialog.checkedInString(ss.name))),
           wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
     }, profile.profileLogin.userKey, eventID: ss.eventID, attendanceKey: attendanceKey, waitlisted: sequence > 0);
   }
@@ -384,8 +389,7 @@ class AttendancePresenter {
   }
 
   static void setAttendance(bool checkedIn, String eventID, String userKey, void attendanceSet(Map data)) {
-    if (userKey != null)
-      FirebaseMethods.setAttendanceByAttendee(eventID, userKey, {'Status': checkedIn, 'Time': DateTime.now().toString()}, attendanceSet);
+    if (userKey != null) FirebaseMethods.setAttendanceByAttendee(eventID, userKey, {'Status': checkedIn, 'Time': DateTime.now().toString()}, attendanceSet);
   }
 
   static void checkout(String eventID, String userKey, void attendanceSet(Map data)) {
@@ -400,26 +404,21 @@ class AttendancePresenter {
     if (userKey != null) FirebaseMethods.setSessionAttendanceByAttendee(eventID, userKey, slotID, {'Reason': reason}, attendanceCancelled);
   }
 
-  static void setAttendanceCancelWorkshop(
-      String eventID, String workshopID, String workshopKey, String userKey, String reason, void attendanceCancelled(Map data)) {
+  static void setAttendanceCancelWorkshop(String eventID, String workshopID, String workshopKey, String userKey, String reason, void attendanceCancelled(Map data)) {
     if (workshopKey != null)
-      FirebaseMethods.setWorkshopCancelAttendanceByAttendee(
-          eventID, workshopKey, userKey, {'Reason': reason, 'CancelledUser': userKey, 'CancelledWorkshop': workshopID}, attendanceCancelled);
+      FirebaseMethods.setWorkshopCancelAttendanceByAttendee(eventID, workshopKey, userKey, {'Reason': reason, 'CancelledUser': userKey, 'CancelledWorkshop': workshopID}, attendanceCancelled);
   }
 
   static void setAttendanceCheckInWorkshop(String eventID, String workshopKey, String userKey, void attendanceCancelled(Map data)) {
-    if (workshopKey != null)
-      FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'CheckedIn', DateTime.now().toString(), attendanceCancelled);
+    if (workshopKey != null) FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'CheckedIn', DateTime.now().toString(), attendanceCancelled);
   }
 
   static void setAttendanceCheckOutWorkshop(String eventID, String workshopKey, String userKey, void attendanceCancelled(Map data)) {
-    if (workshopKey != null)
-      FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'CheckedOut', DateTime.now().toString(), attendanceCancelled);
+    if (workshopKey != null) FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'CheckedOut', DateTime.now().toString(), attendanceCancelled);
   }
 
   static void setAttendanceFeedbackWorkshop(String eventID, String workshopKey, String userKey, void attendanceCancelled(Map data)) {
-    if (workshopKey != null)
-      FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'Feedback', DateTime.now().toString(), attendanceCancelled);
+    if (workshopKey != null) FirebaseMethods.setWorkshopAttendanceByAttendee(eventID, workshopKey, userKey, 'Feedback', DateTime.now().toString(), attendanceCancelled);
   }
 
   static void setFeedback(String eventID, String userKey, void attendanceSet(Map data)) {
@@ -451,20 +450,14 @@ class AttendancePresenter {
   }
 
   static void setSessionAttendance(String eventID, String userID, String slotID, String sessionID, void onData(Map data)) {
-    if (userID != null)
-      FirebaseMethods.setUserSessionAttendanceBySessionID(
-          eventID, userID, slotID, {'SessionID': sessionID, 'Registered': DateTime.now().toString()}, onData);
+    if (userID != null) FirebaseMethods.setUserSessionAttendanceBySessionID(eventID, userID, slotID, {'SessionID': sessionID, 'Registered': DateTime.now().toString()}, onData);
   }
 
   static void setWorkshopAttendance(String eventID, String userID, String workshopID, void onData(Map data)) {
-    if (userID != null)
-      FirebaseMethods.setUserWorkshopAttendanceByWorkshopID(
-          eventID, userID, {'UserID': userID, 'WorkshopID': workshopID, 'Registered': DateTime.now().toString()}, onData);
+    if (userID != null) FirebaseMethods.setUserWorkshopAttendanceByWorkshopID(eventID, userID, {'UserID': userID, 'WorkshopID': workshopID, 'Registered': DateTime.now().toString()}, onData);
   }
 
   static void selfSetSessionAttendance(String eventID, String userID, String slotID, String direction, void onData()) {
-    if (userID != null)
-      FirebaseMethods.setSessionAttendanceByUserKey(
-          eventID, userID, slotID, direction == "IN" ? "CheckedIn" : "CheckedOut", DateTime.now().toString(), onData);
+    if (userID != null) FirebaseMethods.setSessionAttendanceByUserKey(eventID, userID, slotID, direction == "IN" ? "CheckedIn" : "CheckedOut", DateTime.now().toString(), onData);
   }
 }

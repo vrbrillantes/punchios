@@ -1,4 +1,5 @@
 import 'model.date.dart';
+import 'package:flutter/material.dart';
 
 class Session {
   final String ID;
@@ -16,13 +17,16 @@ class Session {
     description = data['Description'];
     venue = data['Venue'];
   }
-}class Workshop {
+}
+
+class Workshop {
   final String ID;
   final String eventID;
   int maxAttendees;
   String name;
   String trackID;
   String description;
+  int weight;
   String venue;
   PunchDate start;
   PunchDate end;
@@ -30,6 +34,7 @@ class Session {
   Workshop.fromFirebase(this.ID, this.eventID, data) {
     name = data['Name'];
     trackID = data['Track'];
+    weight = data['Weight'] == null ? 1 : data['Weight'];
     maxAttendees = data['Max'] == null ? 0 : data['Max'];
     description = data['Description'];
     venue = data['Venue'];
@@ -83,9 +88,21 @@ class Track {
   final String ID;
   String name;
   List<Workshop> trackWorkshops = <Workshop>[];
+  Image image;
 
   Track.fromFirebase(this.ID, data) {
     name = data['Name'];
+    image = data['Image'] == null
+        ? Image.asset(
+            'images/badges-complete@2x.png',
+            width: 60,
+            fit: BoxFit.fitWidth,
+          )
+        : Image.network(
+            data['Image'],
+            width: 60,
+            fit: BoxFit.fitWidth,
+          );
   }
 
   void addWorkshop(Workshop ss) {
@@ -96,7 +113,7 @@ class Track {
 class EventSessions {
   Map<String, Session> getFirebaseSessions(Map data, String eventID) {
     Map<String, Session> eventSessions = {};
-    if (data != null) {
+    if (data != null && data['Sessions'] != null) {
       data['Sessions'].forEach((kk, vv) {
         Session newSession = Session.fromFirebase(kk, eventID, vv);
         eventSessions[newSession.ID] = newSession;
@@ -104,6 +121,7 @@ class EventSessions {
     }
     return eventSessions;
   }
+
   Map<String, Workshop> getFirebaseWorkshops(Map data, String eventID) {
     Map<String, Workshop> eventWorkshops = {};
     if (data != null) {
@@ -118,7 +136,7 @@ class EventSessions {
   Map<String, Day> getEventDays(List<Slot> slots) {
     Map<String, Day> eventDays = {};
     slots.forEach((Slot s) {
-      if (! eventDays.containsKey(s.start.simpleDate)) {
+      if (!eventDays.containsKey(s.start.simpleDate)) {
         eventDays[s.start.simpleDate] = Day.fromFirebase(s.start.simpleDate);
       }
       eventDays[s.start.simpleDate].addSlot(s);
@@ -128,7 +146,7 @@ class EventSessions {
 
   Map<String, Slot> getEventSlots(Map data) {
     Map<String, Slot> eventSlots = {};
-    if (data != null) {
+    if (data != null&& data['Slots'] != null) {
       data['Slots'].forEach((k, v) {
         Slot newSlot = Slot.fromFirebase(k, v);
         eventSlots[k] = newSlot;
