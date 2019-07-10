@@ -89,9 +89,11 @@ class Track {
   String name;
   List<Workshop> trackWorkshops = <Workshop>[];
   Image image;
+  int minCompletion;
 
   Track.fromFirebase(this.ID, data) {
     name = data['Name'];
+    minCompletion = data['MinCompletion'] == null ? 10 : data['MinCompletion'];
     image = data['Image'] == null
         ? Image.asset(
             'images/badges-complete@2x.png',

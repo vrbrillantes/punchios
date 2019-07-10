@@ -180,7 +180,7 @@ class _ScreenLoginBuild extends State<ScreenLoginState> {
                         action:
                         returnedLogin ? loginFunctions.googleSignIn : null,
                       ),
-                      Text(loginStatus),
+//                      Text(loginStatus),
 //                      phoneAuth
 //                          ? SizedBox()
 //                          : PunchRaisedButton(

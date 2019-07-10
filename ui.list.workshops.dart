@@ -70,11 +70,11 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
   Widget build(BuildContext context) {
     List<String> tracks = sessionHolder.eventTracks.keys.toList();
     Widget createBadge(Track e) {
-      int maxCompletion = 0;
+//      int maxCompletion = e.minCompletion;
       int potentialCompletion = 0;
       int actualCompletion = 0;
       e.trackWorkshops.forEach((Workshop ww) {
-        maxCompletion += ww.weight;
+//        maxCompletion += ww.weight;
         if (workshopAttendance.containsKey(ww.ID)) {
           potentialCompletion += ww.weight;
           if (workshopAttendance[ww.ID].attendance.checkedIn) actualCompletion += ww.weight;
@@ -108,7 +108,7 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
                 valueColor: AlwaysStoppedAnimation(AppColors.appAccentYellow),
 //                valueColor: AlwaysStoppedAnimation(badgesHolder.eventBadges.length == badgesHolder.earnedBadges.length ? AppColors.appAccentGreen : AppColors.appAccentOrange),
                 strokeWidth: 5,
-                value: 0.04 + (potentialCompletion/maxCompletion),
+                value: 0.04 + (potentialCompletion/e.minCompletion),
               ),
             ),
           ),
@@ -122,7 +122,7 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
                 valueColor: AlwaysStoppedAnimation(AppColors.appTeal),
 //                valueColor: AlwaysStoppedAnimation(badgesHolder.eventBadges.length == badgesHolder.earnedBadges.length ? AppColors.appAccentGreen : AppColors.appAccentOrange),
                 strokeWidth: 5,
-                value: 0.02 + (actualCompletion/maxCompletion),
+                value: 0.02 + (actualCompletion/e.minCompletion),
               ),
             ),
           ),
