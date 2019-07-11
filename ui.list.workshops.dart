@@ -165,7 +165,7 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
                 ? SizedBox()
                 : Container(
                     margin: EdgeInsets.symmetric(vertical: 30),
-                    height: 60,
+                    height: 100,
                     child: ListView(
                       padding: EdgeInsets.symmetric(horizontal: 18),
                       scrollDirection: Axis.horizontal,
@@ -176,7 +176,7 @@ class WorkshopViewState extends State<WorkshopView> with TickerProviderStateMixi
             return tracks.length == 0
                 ? SizedBox()
                 : Container(
-                    margin: EdgeInsets.fromLTRB(18, 40, 18, 20),
+                    margin: EdgeInsets.fromLTRB(18, 0, 18, 20),
                     child: Text("Categories (${sessionHolder.eventTracks.length})", style: AppTextStyles.styleWhiteBold(16)),
                   );
           } else {
