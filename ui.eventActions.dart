@@ -21,9 +21,6 @@ class EventActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-//    PunchRaisedButton feedbackButton = PunchRaisedButton(label: 'Send feedback', action: () => actionPressed("feedback"));
-//    PunchRaisedButton questionButton = PunchRaisedButton(label: 'Ask question', action: () => actionPressed("question"));
-//    PunchRaisedButton checkinButton = PunchRaisedButton(label: 'Check-in', action: () => actionPressed("checkin"));
     PunchRaisedButton registerButton = PunchRaisedButton(label: 'Register to this event', action: () => actionPressed("register"));
     PunchRaisedButton adminButton = PunchRaisedButton(label: 'Admin actions', action: () => actionPressed("admin"));
     PunchRaisedButton editingButton = PunchRaisedButton(label: 'Save changes', action: () => actionPressed("doneEditing"));
@@ -175,7 +172,6 @@ class AdminButtons extends StatelessWidget {
     List<TableRow> actions = <TableRow>[];
     actions.add(TableRow(children: <Widget>[
       AdminActionButtons('Scan Session', Icons.camera_enhance, onPressed: () => onPress('scanSession')),
-//      AdminActionButtons('Scan Session', Icons.edit, onPressed: () => onPress('showScanned')),
       AdminActionButtons('Collab', Icons.people, onPressed: () => onPress('collab')),
       AdminActionButtons('Notif', Icons.notifications, onPressed: () => onPress('notif')),
     ]));

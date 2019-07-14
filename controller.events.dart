@@ -4,6 +4,7 @@ import 'util.dialog.dart';
 import 'model.events.dart';
 import 'model.session.dart';
 import 'model.notification.dart';
+import 'controller.notifications.dart';
 import 'model.participation.dart';
 import 'controller.participation.dart';
 import 'model.profile.dart';
@@ -27,7 +28,7 @@ class EventListHolder {
   }
 
   void initNotifs(String userKey) {
-    myNotifications = Notifications.init(userKey);
+    myNotifications = NotificationHolder.init(userKey);
   }
 
   StreamSubscription _subscriptionTodo;
@@ -38,7 +39,7 @@ class EventListHolder {
 
   bool isOnline = false;
 
-  Notifications myNotifications = Notifications();
+  NotificationHolder myNotifications = NotificationHolder();
   Events events = Events();
 
   void setStatus(bool s) {
@@ -71,13 +72,6 @@ class EventListHolder {
         : EventPresenter.getOfflineEvents(setEvents);
   }
 
-  void showNotifications(void done()) async {
-    if (_subscriptionTodo != null) {
-      _subscriptionTodo.cancel();
-    }
-    await Navigator.pushNamed(context, '/notifs', arguments: ScreenNotificationsArguments(myNotifications));
-    getNotifications(done);
-  }
 
   void readNotification(String pn) {
     myNotifications.readNotification(myNotifications.allNotifications[pn]);
@@ -216,95 +210,6 @@ class EventHolder {
 
 }
 
-class ParticipationHolder {
-  final BuildContext context;
-  final Event event;
-  Session session;
-  Workshop workshop;
-  final Profile profile;
-  GenericDialogGenerator dialog;
-
-  EventParticipation participation;
-
-  ParticipationHolder(this.context, this.event, this.profile) {
-    dialog = GenericDialogGenerator.init(context);
-
-    participation = EventParticipation(eventID: event.eventID, profile: profile);
-  }
-
-  ParticipationHolder.session(this.context, this.event, this.session, this.profile) {
-    dialog = GenericDialogGenerator.init(context);
-
-    participation = EventParticipation(eventID: event.eventID, sessionID: session.ID, profile: profile);
-  }
-  ParticipationHolder.workshop(this.context, this.event, this.workshop, this.profile) {
-    dialog = GenericDialogGenerator.init(context);
-
-    participation = EventParticipation(eventID: event.eventID, workshopID: workshop.ID, profile: profile);
-  }
-
-  void gotoQuestions() {
-    Navigator.pushNamed(
-      context,
-      '/questions',
-      arguments: ScreenQuestionAruments(
-        profile: profile,
-        eventID: event.eventID,
-      ),
-    );
-  }
-
-  void sendFeedbackSession(bool isCollaborator, void feedbackSent()) async {
-    List<Response> responseList = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => ScreenFeedback(
-                  editable: isCollaborator,
-                  eventKey: event.eventID,
-                  eventName: event.eventDetails.name,
-                  session: true,
-                )));
-    if (responseList != null)
-      participation.sendSessionFeedback(responseList, () {
-        feedbackSent();
-        dialog.confirmDialog(dialog.feedbackSubmittedString);
-      });
-  }
-
-  void sendFeedbackWorkshop(bool isCollaborator, void feedbackSent()) async {
-    List<Response> responseList = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => ScreenFeedback(
-                  editable: isCollaborator,
-                  eventKey: event.eventID,
-                  eventName: event.eventDetails.name,
-                  workshop: true,
-                )));
-    if (responseList != null)
-      participation.sendWorkshopFeedback(responseList, () {
-        feedbackSent();
-        dialog.confirmDialog(dialog.feedbackSubmittedString);
-      });
-  }
-
-  void sendFeedback(bool isCollaborator, void feedbackSent()) async {
-    List<Response> responseList = await Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => ScreenFeedback(
-                  editable: isCollaborator,
-                  eventKey: event.eventID,
-                  eventName: event.eventDetails.name,
-                )));
-    if (responseList != null)
-      participation.sendFeedback(responseList, () {
-        feedbackSent();
-        dialog.confirmDialog(dialog.feedbackSubmittedString);
-      });
-  }
-
-}
 
 AppPreferences prefs = AppPreferences.newInstance();
 

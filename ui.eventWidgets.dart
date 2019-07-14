@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'model.events.dart';
-import 'model.notification.dart';
+import 'controller.notifications.dart';
 import 'ui.util.dart';
 import 'util.qr.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
 class UIElements {
-  static void modalBS(BuildContext context, String direction, void onScan(), String userKey, {String eventID, String sessionID, String attendanceKey, bool waitlisted = false}) {
+  static void modalBS(BuildContext context, String direction, void onScan(), String userKey,
+      {String eventID, String sessionID, String attendanceKey, bool waitlisted = false}) {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
@@ -24,59 +25,52 @@ class UIElements {
   }
 }
 
-//class HomeTabBar extends AppBar {
-//  HomeTabBar({this.onItemTapped, this.selectedIndex, this.showNotifications, this.myNotifications});
-//
-//  final int selectedIndex;
-//  final Function(int) onItemTapped;
-//  final VoidCallback showNotifications;
-//  final Notifications myNotifications;
-//
-//  @override
-//  Widget build(BuildContext context) {
-//    return AppBar(
-//      bottom: TabBar(
-//        indicatorColor: AppColors.appAccentYellow,
-//        indicatorWeight: 5,
-//        isScrollable: true,
-//        tabs: punchItems.map<Widget>((TabBarItem tbi) {
-//          return TabBarPadding(tbItem: tbi, selected: selectedIndex);
-//        }).toList(),
-//        onTap: onItemTapped,
-//      ),
-//      backgroundColor: AppColors.appColorMainTransparent,
-//      automaticallyImplyLeading: false,
-//      title: Image.asset(
-//        'images/logo_punch-main.png',
-//        height: 40,
-//      ),
-//      actions: <Widget>[
-//        NotificationIcon(unreadNotifications: myNotifications, showNotifications: showNotifications),
-////                  IconButton(icon: Icon(Icons.apps), onPressed: () {}),
-////                  IconButton(icon: Icon(Icons.search), onPressed: () {}),
-//      ],
-//    );
-//  }
-//}
+class PlaceholderBanner extends StatefulWidget {
+  @override
+  PlaceholderBannerState createState() => PlaceholderBannerState();
+}
 
-class PlaceholderBanner extends StatelessWidget {
+class PlaceholderBannerState extends State<PlaceholderBanner> with TickerProviderStateMixin {
+  AnimationController _controller2;
+  CurvedAnimation _curvedController2;
+  Animation<double> animation2;
+
+  @override
+  void initState() {
+    _controller2 = AnimationController(vsync: this, duration: Duration(seconds: 3));
+    _curvedController2 = CurvedAnimation(parent: _controller2, curve: Curves.easeInOutSine);
+    animation2 = Tween<double>(end: 0.9, begin: 0.1).animate(_curvedController2);
+    super.initState();
+  }
+
+  void confor() {
+      print("HELLO");
+      _controller2.forward(from: 0).then((_) => _controller2.reverse().then((_) => confor()));
+  }
+
   @override
   Widget build(BuildContext context) {
+    confor();
     return Card(
       clipBehavior: Clip.hardEdge,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       margin: EdgeInsets.fromLTRB(16, 4, 16, 12),
       child: Stack(
         children: <Widget>[
-          Container(
-            height: 120,
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-              colors: <Color>[AppColors.appGreyscalePlus, AppColors.appGreyscaleMinus],
-              end: Alignment.topRight,
-              begin: Alignment.bottomLeft,
-            )),
-            width: double.infinity,
+          AnimatedBuilder(
+            animation: _controller2,
+            builder: (context, anim) => Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      stops: [0, animation2.value, 1],
+                      colors: <Color>[AppColors.appGreyscalePlus, AppColors.appGreyscaleBaseline, AppColors.appGreyscaleMinus],
+                      end: Alignment.topRight,
+                      begin: Alignment.bottomLeft,
+                    ),
+                  ),
+                  width: double.infinity,
+                ),
           ),
           Positioned(
             right: 16,
@@ -190,25 +184,6 @@ class EventIcons extends StatelessWidget {
       mainAxisAlignment: space ? MainAxisAlignment.spaceEvenly : MainAxisAlignment.start,
       children: <Widget>[
         SizedBox(width: space ? 0 : 8),
-//        InkWell(
-//          onTap: () {},
-//          child: Row(
-//            children: <Widget>[
-//              Icon(Icons.share, size: 14, color: AppColors.appGreyBlue),
-//              Text('Share', style: AppTextStyles.bannerActions),
-//            ],
-//          ),
-//        ),
-//        SizedBox(width: 8),
-//        InkWell(
-//          onTap: () {},
-//          child: Row(
-//            children: <Widget>[
-//              Icon(Icons.event_note, size: 14, color: calv ? AppColors.appAccentYellow : AppColors.appGreyBlue),
-//              Text('Add to calendar', style: calv ? AppTextStyles.bannerActionsClicked : AppTextStyles.bannerActions),
-//            ],
-//          ),
-//        ),
         InkWell(
           onTap: onShowInterest,
           child: Padding(
@@ -397,7 +372,8 @@ class EventDetailsBar extends StatelessWidget {
           child: ListTile(
             title: Text(
                 loadEvent.start.day != loadEvent.end.day
-                    ? "${loadEvent.start.longmonth} ${loadEvent.start.day}-${loadEvent.end.day}, ${loadEvent.start.longyear} " + "(${loadEvent.start.shortweekday}-${loadEvent.end.shortweekday})"
+                    ? "${loadEvent.start.longmonth} ${loadEvent.start.day}-${loadEvent.end.day}, ${loadEvent.start.longyear} " +
+                        "(${loadEvent.start.shortweekday}-${loadEvent.end.shortweekday})"
                     : "${loadEvent.start.longdate} (${loadEvent.start.shortweekday})",
                 style: AppTextStyles.eventDetails),
             leading: Image.asset('images/calendar@2x.png', height: 20),
@@ -528,7 +504,9 @@ class RelatedInfoDetailsBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: eventLinks.map<Widget>((EventLink e) {
                       return InkWell(
-                          child: Container(child: Text(e.name, style: AppTextStyles.eventLinks), padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6)), onTap: () => _launchURL(e.link));
+                          child: Container(
+                              child: Text(e.name, style: AppTextStyles.eventLinks), padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6)),
+                          onTap: () => _launchURL(e.link));
                     }).toList()),
               ),
             ],
@@ -704,7 +682,7 @@ class NotificationIcon extends StatelessWidget {
   NotificationIcon({this.unreadNotifications, this.showNotifications});
 
   final VoidCallback showNotifications;
-  final Notifications unreadNotifications;
+  final NotificationHolder unreadNotifications;
 
   @override
   Widget build(BuildContext context) {

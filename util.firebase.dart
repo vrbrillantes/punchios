@@ -24,18 +24,21 @@ final dbInterested = FirebaseDatabase.instance.reference().child('InterestedEven
 final dbSessionFeedbackResponses = FirebaseDatabase.instance.reference().child('SessionFeedbackResponses');
 final dbWorkshopFeedbackResponses = FirebaseDatabase.instance.reference().child('WorkshopFeedbackResponses');
 final dbEventFeedbackResponses = FirebaseDatabase.instance.reference().child('EventFeedbackResponses');
+
+final dbQuestions = FirebaseDatabase.instance.reference().child("Questions");
+final dbSessionQuestions = FirebaseDatabase.instance.reference().child("SessionQuestions");
+final dbWorkshopQuestions = FirebaseDatabase.instance.reference().child("WorkshopQuestions");
+
 final dbRegistrations = FirebaseDatabase.instance.reference().child('EventAttendance');
 //final dbRegistrations = FirebaseDatabase.instance.reference().child('Registrations');
 final dbAttendanceStats = FirebaseDatabase.instance.reference().child('EventRegistrations');
 //final dbSessionRegistrations = FirebaseDatabase.instance.reference().child('SessionRegistrations');
 final dbSessionRegistrations = FirebaseDatabase.instance.reference().child('SessionAttendance');
 final dbWorkshopsRegistrations = FirebaseDatabase.instance.reference().child('WorkshopAttendance');
-final dbQuestions = FirebaseDatabase.instance.reference().child("Questions");
-final dbSessionQuestions = FirebaseDatabase.instance.reference().child("SessionQuestions");
-final dbWorkshopQuestions = FirebaseDatabase.instance.reference().child("WorkshopQuestions");
 final dbEarnedBadges = FirebaseDatabase.instance.reference().child("EarnedBadges");
 final dbEventBadges = FirebaseDatabase.instance.reference().child("EventBadges");
 final dbKiosk = FirebaseDatabase.instance.reference().child('Kiosk');
+final dbVars = FirebaseDatabase.instance.reference().child('Vars');
 
 //final dbNotifications = FirebaseDatabase.instance.reference().child('Notifications');
 //final dbUserInfo = FirebaseDatabase.instance.reference().child('Users');
@@ -53,6 +56,10 @@ final dbKiosk = FirebaseDatabase.instance.reference().child('Kiosk');
 //final dbEventBadges = FirebaseDatabase.instance.reference().child('EventBadges');
 
 class FirebaseMethods {
+  static void getAppVersion(String version, void onData(Map data)) {
+    dbVars.child(version).once().then((DataSnapshot ss) => onData(ss.value));
+  }
+
   static Future<StreamSubscription<Event>> getEventsByActiveStatus(void onData(Map todo)) async {
     return dbEventList.onValue.listen((Event e) => onData(e.snapshot.value));
   }
@@ -126,7 +133,11 @@ class FirebaseMethods {
 
   static void setSessionAttendanceFeedbackSent(String eventID, String slotID, String userKey, void onData(Map data)) {
     DatabaseReference mySessionAttendance = dbSessionRegistrations.child(eventID).child(userKey);
-    mySessionAttendance.child(slotID).child('Feedback').set(true).whenComplete(() => mySessionAttendance.once().then((DataSnapshot ss) => onData(ss.value)));
+    mySessionAttendance
+        .child(slotID)
+        .child('Feedback')
+        .set(true)
+        .whenComplete(() => mySessionAttendance.once().then((DataSnapshot ss) => onData(ss.value)));
   }
 
   static void setWorkshopAttendanceFeedbackSent(String eventID, String workshopID, String userKey, void onData(Map data)) {
@@ -157,7 +168,10 @@ class FirebaseMethods {
 
   static void setUserWorkshopAttendanceByWorkshopID(String eventID, String userID, Map data, void onData(Map data)) {
     DatabaseReference myWorkshops = dbWorkshopsRegistrations.child(eventID);
-    myWorkshops.push().set(data).whenComplete(() => myWorkshops.orderByChild('UserID').equalTo(userID).once().then((DataSnapshot ss) => onData(ss.value)));
+    myWorkshops
+        .push()
+        .set(data)
+        .whenComplete(() => myWorkshops.orderByChild('UserID').equalTo(userID).once().then((DataSnapshot ss) => onData(ss.value)));
   }
 
   static void setSessionAttendanceByAttendee(String eventID, String userKey, String slotID, Map data, void onData(Map data)) {
@@ -165,14 +179,22 @@ class FirebaseMethods {
     mySessions.child(slotID).set(data).whenComplete(() => mySessions.once().then((DataSnapshot ss) => onData(ss.value)));
   }
 
-  static void setWorkshopAttendanceByAttendee(String eventID, String workshopKey, String userKey, String status, String value, void onData(Map data)) {
+  static void setWorkshopAttendanceByAttendee(
+      String eventID, String workshopKey, String userKey, String status, String value, void onData(Map data)) {
     DatabaseReference myWorkshops = dbWorkshopsRegistrations.child(eventID);
-    myWorkshops.child(workshopKey).child(status).set(value).whenComplete(() => myWorkshops.orderByChild('UserID').equalTo(userKey).once().then((DataSnapshot ss) => onData(ss.value)));
+    myWorkshops
+        .child(workshopKey)
+        .child(status)
+        .set(value)
+        .whenComplete(() => myWorkshops.orderByChild('UserID').equalTo(userKey).once().then((DataSnapshot ss) => onData(ss.value)));
   }
 
   static void setWorkshopCancelAttendanceByAttendee(String eventID, String workshopKey, String userKey, Map data, void onData(Map data)) {
     DatabaseReference myWorkshops = dbWorkshopsRegistrations.child(eventID);
-    myWorkshops.child(workshopKey).set(data).whenComplete(() => myWorkshops.orderByChild('UserID').equalTo(userKey).once().then((DataSnapshot ss) => onData(ss.value)));
+    myWorkshops
+        .child(workshopKey)
+        .set(data)
+        .whenComplete(() => myWorkshops.orderByChild('UserID').equalTo(userKey).once().then((DataSnapshot ss) => onData(ss.value)));
   }
 
   static Future<StreamSubscription<Event>> getAttendanceByUserKey(String userKey, String eventID, void onData(Map data)) async {
@@ -223,7 +245,9 @@ class FirebaseMethods {
   }
 
   static void setEventQuestion(String eventID, String sessionID, Map data, void onData()) {
-    sessionID == null ? dbQuestions.child(eventID).push().set(data).whenComplete(onData) : dbSessionQuestions.child(eventID).child(sessionID).push().set(data).whenComplete(onData);
+    sessionID == null
+        ? dbQuestions.child(eventID).push().set(data).whenComplete(onData)
+        : dbSessionQuestions.child(eventID).child(sessionID).push().set(data).whenComplete(onData);
   }
 
   static Future<StreamSubscription<Event>> getEventQuestionsByEventIDRefresh(String eventID, String sessionID, void onData(Map todo)) async {

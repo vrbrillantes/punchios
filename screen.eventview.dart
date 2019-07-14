@@ -15,7 +15,7 @@ import 'util.dialog.dart';
 import 'util.internet.dart';
 
 import 'screen.sessions.dart';
-
+import 'controller.participation.dart';
 import 'controller.attendance.dart';
 import 'controller.sessions.dart';
 import 'controller.events.dart';
@@ -218,9 +218,7 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
         context: context,
         builder: (BuildContext context) {
           return CheckedInList(
-            collabs: eventAttendees.scannedAttendees.keys
-                .map((v) => v.toString() + " " + eventAttendees.scannedAttendees[v]['direction'])
-                .toList(),
+            collabs: eventAttendees.scannedAttendees.keys.map((v) => v.toString() + " " + eventAttendees.scannedAttendees[v]['direction']).toList(),
           );
         });
   }
@@ -245,10 +243,6 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
               if (s) dialog.confirmDialog(dir == "IN" ? dialog.checkedInAttendeeString : dialog.checkOutAttendeeString);
             }),
         wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
-  }
-
-  void modalBS(String direction, void onScan(), {String eventID, String sessionID}) {
-    UIElements.modalBS(context, direction, onScan, profile.profileLogin.userKey, eventID: eventID, sessionID: sessionID);
   }
 
   Future<bool> checkOverlay() {

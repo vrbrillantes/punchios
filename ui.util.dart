@@ -165,6 +165,22 @@ List<TabBarItem> punchItems = <TabBarItem>[
     2,
   )
 ];
+List<TabBarItem> noProfilePunchItems = <TabBarItem>[
+  TabBarItem.newItem(
+    Image.asset('images/my-profile_inactive@2x.png', height: 18),
+    Image.asset('images/my-profile_active@2x.png', height: 18),
+    "My profile",
+    0,
+  )
+];
+List<TabBarItem> outdatedAppPunchItems = <TabBarItem>[
+  TabBarItem.newItem(
+    Image.asset('images/my-profile_inactive@2x.png', height: 18),
+    Image.asset('images/my-profile_active@2x.png', height: 18),
+    "Punch Alert",
+    0,
+  )
+];
 
 List<Widget> punchActions = <Widget>[];
 
