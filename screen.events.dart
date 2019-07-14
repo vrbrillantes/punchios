@@ -3,6 +3,7 @@ import 'ui.backdrop.dart';
 import 'ui.list.event.dart';
 import 'ui.util.dart';
 import 'ui.eventWidgets.dart';
+import 'controller.prefs.dart';
 import 'screen.profileview.dart';
 import 'screen.eventview.dart';
 import 'util.internet.dart';
@@ -25,6 +26,8 @@ class ScreenEventsState extends StatefulWidget {
 class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderStateMixin {
   EventListHolder eventsHolder;
   ProfileHolder profileHolder;
+  PunchPreferences punchPrefs;
+
   CalendarHolder calendarHolder;
   int _selectedIndex = 0;
   bool profileSet = true;
@@ -32,6 +35,7 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
 
   @override
   void initState() {
+    punchPrefs = PunchPreferences.init(() => setState(() {}));
     eventsHolder = EventListHolder(context);
     calendarHolder = CalendarHolder.newCal(context);
     profileHolder = ProfileHolder(
@@ -63,7 +67,7 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
 
   void onlineInitState(bool s) {
     setStatus(s);
-    eventsHolder.getEvents(() => setState(() {}));
+//    eventsHolder.getEvents(() => setState(() {}));
     eventsHolder.getNotifications(() => setState(() {}));
 
     profileHolder.getOnlineAccount(setProfileSet);
@@ -95,6 +99,10 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
 
   @override
   Widget build(BuildContext context) {
+    List<TabBarItem> currentDisplayItems = (punchPrefs.isValidVersion != null && !punchPrefs.isValidVersion)
+        ? outdatedAppPunchItems
+        : (profileSet == false ? noProfilePunchItems : punchItems);
+
     return Theme(
         data: ThemeData(
           brightness: Brightness.light,
@@ -103,14 +111,14 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
         child: Stack(children: <Widget>[
           Backdrop(),
           DefaultTabController(
-            length: 3,
+            length: currentDisplayItems.length,
             child: Scaffold(
               appBar: AppBar(
                 bottom: TabBar(
                   indicatorColor: AppColors.appAccentYellow,
                   indicatorWeight: 5,
                   isScrollable: true,
-                  tabs: punchItems.map<Widget>((TabBarItem tbi) {
+                  tabs: currentDisplayItems.map<Widget>((TabBarItem tbi) {
                     return TabBarPadding(tbItem: tbi, selected: _selectedIndex);
                   }).toList(),
                   onTap: _onItemTapped,
@@ -132,22 +140,26 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
                 ],
               ),
               backgroundColor: const Color(0x00000000),
-              body: (_selectedIndex == 2 || profileSet == false)
-                  ? ProfileForm(
-                      profile: profileHolder.profile,
-                      dialog: eventsHolder.dialog,
-                      profileSet: setProfileSet,
+              body: (punchPrefs.isValidVersion != null && !punchPrefs.isValidVersion)
+                  ? Container(
+                      child: Text("INVALID VERSION"),
                     )
-                  : AllListEvent(
+                  : ((_selectedIndex == 2 || profileSet == false)
+                      ? ProfileForm(
+                          profile: profileHolder.profile,
+                          dialog: eventsHolder.dialog,
+                          profileSet: setProfileSet,
+                        )
+                      : AllListEvent(
 //                  : TransformingEvent(
-                      refresh: () => setState(() {}),
-                      interested: calendarHolder.setInterestedEvent,
-                      onPressed: showEvent,
-                      selectedIndex: _selectedIndex,
-                      allEvents: eventsHolder,
-                      checkInPressed: calendarHolder.checkIn,
-                      subscriptionList: profileHolder.mySubscriptions,
-                    ),
+                          refresh: () => setState(() {}),
+                          interested: calendarHolder.setInterestedEvent,
+                          onPressed: showEvent,
+                          selectedIndex: _selectedIndex,
+                          allEvents: eventsHolder,
+                          checkInPressed: calendarHolder.checkIn,
+                          subscriptionList: profileHolder.mySubscriptions,
+                        )),
             ),
           ),
           SafeArea(
@@ -179,6 +191,7 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
   }
 
   void showEvent(String eventID) {
-    Navigator.pushNamed(context, '/eventView', arguments: ScreenEventArguments(profile: profileHolder.profile, loadEvent: eventsHolder.allEvents[eventID]));
+    Navigator.pushNamed(context, '/eventView',
+        arguments: ScreenEventArguments(profile: profileHolder.profile, loadEvent: eventsHolder.allEvents[eventID]));
   }
 }

@@ -1,32 +1,8 @@
-import 'util.firebase.dart';
+//import 'util.firebase.dart';
+import 'controller.participation.dart';
 import 'model.profile.dart';
 import 'dart:async';
 
-class QuestionPresenter {
-  static void getQuestions(String eid, String sid, void done(Map data), void returnSS(StreamSubscription s)) {
-    FirebaseMethods.getEventQuestionsByEventIDRefresh(eid, sid, done).then(returnSS);
-  }
-
-  static void setEventQuestion(String eventID, String sessionID, String userID, String name, String question, void questionSubmitted()) {
-    FirebaseMethods.setEventQuestion(
-      eventID,
-      sessionID,
-      {
-        'Name': name,
-        'UserID': userID,
-        'Photo': "",
-        "Question": question,
-        "QuestionKey": eventID,
-        "Time": DateTime.now().toString(),
-      },
-      questionSubmitted,
-    );
-  }
-
-  static void setVote(String eventID, String sessionID, String questionID, String userID, void done()) {
-    FirebaseMethods.setQuestionVoteByUserKey(eventID, sessionID, questionID, userID, done);
-  }
-}
 
 class Question {
   String name;

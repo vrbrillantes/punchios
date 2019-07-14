@@ -8,10 +8,9 @@ import 'controller.events.dart';
 
 List<String> pageTitles = <String>['All events', 'Events I\'m interested in', 'My profile'];
 
-class ListEvent extends StatelessWidget {
+class ListEvent extends StatefulWidget {
   ListEvent({
     this.subscriptionList,
-    this.selectedIndex,
     this.onPressed,
     this.allEvents,
     this.interested,
@@ -19,15 +18,39 @@ class ListEvent extends StatelessWidget {
 
   final Function(Event) interested;
   final Function(String) onPressed;
-  final int selectedIndex;
   final EventListHolder allEvents;
   final Map<String, EventSubscription> subscriptionList;
 
   @override
+  ListEventState createState() =>
+      ListEventState(interested: interested, onPressed: onPressed, allEvents: allEvents, subscriptionList: subscriptionList);
+}
+
+class ListEventState extends State<ListEvent> {
+  ListEventState({
+    this.subscriptionList,
+    this.onPressed,
+    this.allEvents,
+    this.interested,
+  });
+
+  final Function(Event) interested;
+  final Function(String) onPressed;
+  final EventListHolder allEvents;
+  final Map<String, EventSubscription> subscriptionList;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    allEvents.getEvents(() => setState(() {}));
+    super.initState();
+  }
+  @override
   Widget build(BuildContext context) {
     List<Event> sortedEvents = <Event>[];
     List<Event> filteredEvents = <Event>[];
-    allEvents.mapEventsList[selectedIndex].forEach((String key) {
+    allEvents.mapEventsList[0].forEach((String key) {
       if (allEvents.allEvents.containsKey(key)) {
         sortedEvents.add(allEvents.allEvents[key]);
       }
@@ -51,7 +74,7 @@ class ListEvent extends StatelessWidget {
           if (index == 0) {
             return Container(
               padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
-              child: Text(pageTitles[selectedIndex], style: AppTextStyles.styleWhiteBold(22)),
+              child: Text(pageTitles[0], style: AppTextStyles.styleWhiteBold(22)),
             );
           } else {
             return filteredEvents.length > 0
@@ -64,14 +87,70 @@ class ListEvent extends StatelessWidget {
                 : PlaceholderBanner();
           }
         },
-        childCount: filteredEvents.length > 0 ? filteredEvents.length + 1 : (selectedIndex == 1 ? 0 : 5),
+        childCount: filteredEvents.length > 0 ? filteredEvents.length + 1 : 5,
+      ),
+    );
+  }
+}
+
+class ListEventInterests extends StatelessWidget {
+  ListEventInterests({
+    this.selectedIndex,
+    this.onPressed,
+    this.allEvents,
+    this.interested,
+  });
+
+  final Function(Event) interested;
+  final Function(String) onPressed;
+  final int selectedIndex;
+  final EventListHolder allEvents;
+
+  @override
+  Widget build(BuildContext context) {
+    List<Event> sortedEvents = <Event>[];
+    allEvents.mapEventsList[selectedIndex].forEach((String key) {
+      if (allEvents.allEvents.containsKey(key)) {
+        sortedEvents.add(allEvents.allEvents[key]);
+      }
+    });
+
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (BuildContext context, int index) {
+          if (index == 0) {
+            return Container(
+              padding: EdgeInsets.symmetric(vertical: 20.0, horizontal: 20.0),
+              child: Text(pageTitles[selectedIndex], style: AppTextStyles.styleWhiteBold(22)),
+            );
+          } else {
+            return sortedEvents.length > 0
+                ? EventBanner(
+                    loadEvent: sortedEvents[index - 1],
+                    onPressed: () => onPressed(sortedEvents[index - 1].eventID),
+                    onLongPress: () => interested(sortedEvents[index - 1]),
+                    isInterested: allEvents.mapEventsList[1].contains(sortedEvents[index - 1].eventID),
+                  )
+                : PlaceholderBanner();
+          }
+        },
+        childCount: sortedEvents.length > 0 ? sortedEvents.length + 1 : 0,
       ),
     );
   }
 }
 
 class TransformingEvent extends StatefulWidget {
-  TransformingEvent({this.onPressed, this.eventPressed, this.refresh, this.checkInPressed, this.interested, this.title = "Upcoming events", this.allEvents, this.selectedIndex, this.subscriptionList});
+  TransformingEvent(
+      {this.onPressed,
+      this.eventPressed,
+      this.refresh,
+      this.checkInPressed,
+      this.interested,
+      this.title = "Upcoming events",
+      this.allEvents,
+      this.selectedIndex,
+      this.subscriptionList});
 
   final Function(Event, Function(List<String> ls)) interested;
   final Function(Event) checkInPressed;
@@ -86,11 +165,25 @@ class TransformingEvent extends StatefulWidget {
 
   @override
   _TransformingEventBuild createState() => _TransformingEventBuild(
-      refresh: refresh, interested: interested, onPressed: onPressed, selectedIndex: selectedIndex, allEvents: allEvents, checkInPressed: checkInPressed, subscriptionList: subscriptionList);
+      refresh: refresh,
+      interested: interested,
+      onPressed: onPressed,
+      selectedIndex: selectedIndex,
+      allEvents: allEvents,
+      checkInPressed: checkInPressed,
+      subscriptionList: subscriptionList);
 }
 
 class _TransformingEventBuild extends State<TransformingEvent> with TickerProviderStateMixin {
-  _TransformingEventBuild({this.onPressed, this.refresh, this.checkInPressed, this.interested, this.title = "Upcoming events", this.allEvents, this.selectedIndex, this.subscriptionList});
+  _TransformingEventBuild(
+      {this.onPressed,
+      this.refresh,
+      this.checkInPressed,
+      this.interested,
+      this.title = "Upcoming events",
+      this.allEvents,
+      this.selectedIndex,
+      this.subscriptionList});
 
   final Function(Event, Function(List<String> ls)) interested;
   final Function(Event) checkInPressed;
@@ -155,7 +248,6 @@ class _TransformingEventBuild extends State<TransformingEvent> with TickerProvid
   Widget build(BuildContext context) {
     return CustomScrollView(slivers: <Widget>[
       HorizontalListEvent(
-        selectedIndex: selectedIndex,
         allEvents: allEvents,
         eventPressed: eventPressed,
         onPressed: onPressed,
@@ -164,7 +256,6 @@ class _TransformingEventBuild extends State<TransformingEvent> with TickerProvid
       ),
       ListEvent(
         subscriptionList: subscriptionList,
-        selectedIndex: selectedIndex,
         allEvents: allEvents,
         onPressed: onPressed,
         interested: setInterest,
@@ -174,7 +265,15 @@ class _TransformingEventBuild extends State<TransformingEvent> with TickerProvid
 }
 
 class AllListEvent extends StatelessWidget {
-  AllListEvent({this.onPressed, this.refresh, this.checkInPressed, this.interested, this.title = "Upcoming events", this.allEvents, this.selectedIndex, this.subscriptionList});
+  AllListEvent(
+      {this.onPressed,
+      this.refresh,
+      this.checkInPressed,
+      this.interested,
+      this.title = "Upcoming events",
+      this.allEvents,
+      this.selectedIndex,
+      this.subscriptionList});
 
   final Function(Event, Function(List<String> ls)) interested;
   final Function(Event) checkInPressed;
@@ -195,27 +294,35 @@ class AllListEvent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomScrollView(slivers: <Widget>[
-      HorizontalListEvent(
-        selectedIndex: selectedIndex,
+    List<Widget> widgets = <Widget>[];
+    if (selectedIndex == 1) {
+      widgets.add(HorizontalListEvent(
         allEvents: allEvents,
         onPressed: onPressed,
         checkInPressed: checkInPressed,
         interested: setInterest,
-      ),
-      ListEvent(
-        subscriptionList: subscriptionList,
+      ));
+      widgets.add(ListEventInterests(
         selectedIndex: selectedIndex,
         allEvents: allEvents,
         onPressed: onPressed,
         interested: setInterest,
-      ),
-    ]);
+      ));
+    } else {
+      widgets.add(ListEvent(
+        subscriptionList: subscriptionList,
+        allEvents: allEvents,
+        onPressed: onPressed,
+        interested: setInterest,
+      ));
+    }
+
+    return CustomScrollView(slivers: widgets);
   }
 }
 
 class HorizontalListEvent extends StatelessWidget {
-  HorizontalListEvent({this.eventPressed, this.checkInPressed, this.title = "Upcoming events", this.onPressed, this.allEvents, this.interested, this.selectedIndex});
+  HorizontalListEvent({this.eventPressed, this.checkInPressed, this.title = "Upcoming events", this.onPressed, this.allEvents, this.interested});
 
   final Function(Event, GlobalKey) eventPressed;
   final Function(Event) checkInPressed;
@@ -223,15 +330,14 @@ class HorizontalListEvent extends StatelessWidget {
   final Function(String) onPressed;
   final String title;
   final EventListHolder allEvents;
-  final int selectedIndex;
 
   @override
   Widget build(BuildContext context) {
     List<Event> sortedEvents = <Event>[];
-    if (selectedIndex == 1)
-      allEvents.attendingEvents.forEach((String key) {
-        if (allEvents.allEvents.containsKey(key) && allEvents.allEvents[key].end.datetime.isAfter(DateTime.now().subtract(Duration(days: 3)))) sortedEvents.add(allEvents.allEvents[key]);
-      });
+    allEvents.attendingEvents.forEach((String key) {
+      if (allEvents.allEvents.containsKey(key) && allEvents.allEvents[key].end.datetime.isAfter(DateTime.now().subtract(Duration(days: 3))))
+        sortedEvents.add(allEvents.allEvents[key]);
+    });
     sortedEvents.sort((a, b) => a.start.datetime.compareTo(b.start.datetime));
     List<Widget> viewEvent = sortedEvents.map<Widget>((Event e) {
 //      GlobalKey thisKey = GlobalKey();

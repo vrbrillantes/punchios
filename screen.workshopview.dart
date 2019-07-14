@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'controller.attendance.dart';
 import 'util.dialog.dart';
 import 'model.session.dart';
-import 'controller.events.dart';
+import 'controller.participation.dart';
 import 'ui.backdrop.dart';
 import 'ui.util.dart';
 import 'ui.buttons.dart';

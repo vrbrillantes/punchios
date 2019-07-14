@@ -3,6 +3,7 @@ import 'ui.util.dart';
 import 'ui.backdrop.dart';
 import 'model.notification.dart';
 import 'dart:async';
+import 'controller.notifications.dart';
 
 
 
@@ -19,7 +20,7 @@ class ScreenNotifications extends StatelessWidget {
 class ScreenNotificationsState extends StatefulWidget {
   ScreenNotificationsState({this.allNotifications});
 
-  final Notifications allNotifications;
+  final NotificationHolder allNotifications;
 
   @override
   _ScreenNotificationsBuild createState() => _ScreenNotificationsBuild(allNotifications: allNotifications);
@@ -29,7 +30,7 @@ class _ScreenNotificationsBuild extends State<ScreenNotificationsState> {
   _ScreenNotificationsBuild({this.allNotifications});
 
   StreamSubscription _subscriptionTodo;
-  final Notifications allNotifications;
+  final NotificationHolder allNotifications;
 
   List<String> unreadNotifications = <String>[];
 

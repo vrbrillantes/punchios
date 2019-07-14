@@ -118,11 +118,10 @@ class AttendanceHolder {
 
   void getAttendance(void done(bool s)) {
     void readAttendance(Map data) {
+      attendance = Attendance.newAttendance(event.eventID, profile);
       attendance.readAttendance(data);
       done(attendance.registered);
     }
-
-    attendance = Attendance.newAttendance(event.eventID, profile);
 
     isOnline
         ? CalendarPresenter.getMyEventAttendance(userKey, event.eventID, readAttendance, (StreamSubscription ss) {

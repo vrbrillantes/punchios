@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'controller.attendance.dart';
-import 'controller.calendar.dart';
 import 'util.dialog.dart';
 import 'model.session.dart';
-import 'controller.events.dart';
 import 'ui.backdrop.dart';
 import 'ui.util.dart';
 import 'ui.buttons.dart';
 import 'screen.questions.dart';
+import 'controller.participation.dart';
 
 class ScreenSessionView extends StatelessWidget {
   ScreenSessionView({this.session, this.attendance, this.slot});

@@ -6,7 +6,6 @@ import 'dart:convert';
 class AppPreferences {
   AppPreferences.newInstance();
 
-  static const String currentVersion = "3.0.1.57";
   static SharedPreferences prefs;
 
   void initInstance(void done()) async {

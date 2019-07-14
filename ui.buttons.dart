@@ -11,14 +11,18 @@ class AdminActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      padding: EdgeInsets.symmetric(vertical: 32.0),
-      onPressed: onPressed,
-      child: Column(
-        children: <Widget>[
-          Icon(icon, size: 24.0, color: AppColors.appColorSecondary),
-          Text(label, style: AppTextStyles.adminActionsIcons),
-        ],
+    return InkWell(
+//      padding: EdgeInsets.symmetric(vertical: 8.0,horizontal: 0),
+      onTap: onPressed,
+      child: Container(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(icon, size: 24.0, color: AppColors.appColorSecondary),
+            Text(label, style: AppTextStyles.adminActionsIcons),
+          ],
+        ),
       ),
     );
   }

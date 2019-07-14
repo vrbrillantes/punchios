@@ -1,24 +1,4 @@
-import 'util.firebase.dart';
-
-class FeedbackPresenter {
-  static void getFeedback(String eventID, void feedbackRetrieved(Map data)) {
-    FirebaseMethods.getFeedbackQuestionsByEventID(eventID, (Map data) {
-      if (data != null) feedbackRetrieved(data);
-    });
-  }
-
-  static void getFeedbackSessions(String eventID, void feedbackRetrieved(Map data)) {
-    FirebaseMethods.getSessionFeedbackQuestionsByEventID(eventID, (Map data) {
-      if (data != null) feedbackRetrieved(data);
-    });
-  }
-  static void getFeedbackWorkshops(String eventID, void feedbackRetrieved(Map data)) {
-    FirebaseMethods.getWorkshopFeedbackQuestionsByEventID(eventID, (Map data) {
-      if (data != null) feedbackRetrieved(data);
-    });
-  }
-}
-
+import 'controller.participation.dart';
 class FeedbackQuestions {
   FeedbackQuestions.fromFirebase(String eventID, void feedbackRetrieved(List<FeedbackQuestion> qq)) {
     FeedbackPresenter.getFeedback(eventID, (Map data) {
