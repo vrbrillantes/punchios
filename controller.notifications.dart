@@ -2,10 +2,10 @@ import 'model.notification.dart';
 import 'util.firebase.dart';
 import 'dart:async';
 
-class ScreenNotificationsArguments {
+class ScreenNotifArgs {
   final NotificationHolder allNotifications;
 
-  ScreenNotificationsArguments(this.allNotifications);
+  ScreenNotifArgs(this.allNotifications);
 }
 
 class NotificationPresenter {

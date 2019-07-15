@@ -12,7 +12,7 @@ class ScreenNotifications extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScreenNotificationsArguments args = ModalRoute.of(context).settings.arguments;
+    final ScreenNotifArgs args = ModalRoute.of(context).settings.arguments;
     return ScreenNotificationsState(allNotifications: args.allNotifications);
   }
 }

@@ -100,8 +100,8 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
   @override
   Widget build(BuildContext context) {
     List<TabBarItem> currentDisplayItems = (punchPrefs.isValidVersion != null && !punchPrefs.isValidVersion)
-        ? outdatedAppPunchItems
-        : (profileSet == false ? noProfilePunchItems : punchItems);
+        ? punchItemsOutdated
+        : (profileSet == false ? punchItemsNoProfile : punchItems);
 
     return Theme(
         data: ThemeData(

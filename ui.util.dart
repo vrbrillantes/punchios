@@ -165,7 +165,7 @@ List<TabBarItem> punchItems = <TabBarItem>[
     2,
   )
 ];
-List<TabBarItem> noProfilePunchItems = <TabBarItem>[
+List<TabBarItem> punchItemsNoProfile = <TabBarItem>[
   TabBarItem.newItem(
     Image.asset('images/my-profile_inactive@2x.png', height: 18),
     Image.asset('images/my-profile_active@2x.png', height: 18),
@@ -173,7 +173,7 @@ List<TabBarItem> noProfilePunchItems = <TabBarItem>[
     0,
   )
 ];
-List<TabBarItem> outdatedAppPunchItems = <TabBarItem>[
+List<TabBarItem> punchItemsOutdated = <TabBarItem>[
   TabBarItem.newItem(
     Image.asset('images/my-profile_inactive@2x.png', height: 18),
     Image.asset('images/my-profile_active@2x.png', height: 18),

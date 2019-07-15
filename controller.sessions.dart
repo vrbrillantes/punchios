@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:punchappflutter/screen.workshopview.dart';
+import 'screen.workshopview.dart';
 import 'controller.attendance.dart';
 import 'model.session.dart';
 import 'screen.sessionview.dart';
