@@ -148,6 +148,7 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
                       ? ProfileForm(
                           profile: profileHolder.profile,
                           dialog: eventsHolder.dialog,
+                          isProfileSet: profileSet,
                           profileSet: setProfileSet,
                         )
                       : AllListEvent(

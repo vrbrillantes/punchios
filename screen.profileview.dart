@@ -135,19 +135,26 @@ TextEditingController idNumberController = TextEditingController();
 TextEditingController firstNameController = TextEditingController();
 
 class ProfileForm extends StatefulWidget {
-  ProfileForm({this.profile, this.dialog, this.profileSet});
+  ProfileForm({this.profile, this.dialog, this.profileSet, this.isProfileSet});
 
+  final bool isProfileSet;
   final Profile profile;
   final GenericDialogGenerator dialog;
   final Function(bool) profileSet;
 
   @override
-  _ProfileFormBuild createState() => new _ProfileFormBuild(profile: profile, dialog: dialog, profileSet: profileSet);
+  _ProfileFormBuild createState() => new _ProfileFormBuild(isProfileSet: isProfileSet, profile: profile, dialog: dialog, profileSet: profileSet);
 }
 
 class _ProfileFormBuild extends State<ProfileForm> {
-  _ProfileFormBuild({this.profile, this.dialog, this.profileSet});
+  _ProfileFormBuild({this.profile, this.dialog, this.profileSet, this.isProfileSet});
 
+  @override
+  void initState() {
+    isEditing = !isProfileSet;
+    super.initState();
+  }
+  final bool isProfileSet;
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   final Profile profile;
   final Function(bool) profileSet;
