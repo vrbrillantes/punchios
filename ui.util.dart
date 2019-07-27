@@ -307,6 +307,7 @@ class AppColors {
   static Color appColorMainTransparent = Color.fromARGB(178, 21, 26, 83);
   static Color appColorBackground = Color.fromARGB(255, 20, 25, 82);
   static Color appColorSecondary = Color.fromARGB(255, 51, 161, 253);
+
   static Color appAccentYellow = Color.fromARGB(255, 253, 218, 73);
   static Color appAccentPurple = Color.fromARGB(255, 140, 82, 255);
   static Color appAccentPurple2 = Color.fromARGB(255, 59, 53, 97);

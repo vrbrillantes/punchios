@@ -59,6 +59,7 @@ class ParticipationPresenter {
 
   static void setSessionAttendeeFeedback(String eventID, String sessionID, String userID, String name, List<dynamic> responseMap, void feedbackSubmitted()) {
     Map data = {'Feedback': responseMap, 'UserID': userID, 'FeedbackKey': eventID, 'Name': name, 'Time': DateTime.now().toString()};
+    print(responseMap);
     if (userID != null) FirebaseMethods.setSessionFeedbackAnswers(eventID, sessionID, userID, data, feedbackSubmitted);
   }
   static void setWorkshopAttendeeFeedback(String eventID, String workshopID, String userID, String name, List<dynamic> responseMap, void feedbackSubmitted()) {
@@ -112,18 +113,18 @@ class EventParticipation {
   void sendFeedback(List<Response> feedback, void feedbackSubmitted()) {
     List<dynamic> responseMap = <dynamic>[];
     feedback.forEach((Response r) => responseMap.add(r.responseMap));
-    ParticipationPresenter.setEventAttendeeFeedback(eventID, profile.profileLogin.userKey, profile.name, feedback, feedbackSubmitted);
+    ParticipationPresenter.setEventAttendeeFeedback(eventID, profile.profileLogin.userKey, profile.name, responseMap, feedbackSubmitted);
   }
 
   void sendSessionFeedback(List<Response> feedback, void feedbackSubmitted()) {
     List<dynamic> responseMap = <dynamic>[];
     feedback.forEach((Response r) => responseMap.add(r.responseMap));
-    ParticipationPresenter.setSessionAttendeeFeedback(eventID, sessionID, profile.profileLogin.userKey, profile.name, feedback, feedbackSubmitted);
+    ParticipationPresenter.setSessionAttendeeFeedback(eventID, sessionID, profile.profileLogin.userKey, profile.name, responseMap, feedbackSubmitted);
   }
   void sendWorkshopFeedback(List<Response> feedback, void feedbackSubmitted()) {
     List<dynamic> responseMap = <dynamic>[];
     feedback.forEach((Response r) => responseMap.add(r.responseMap));
-    ParticipationPresenter.setWorkshopAttendeeFeedback(eventID, workshopID, profile.profileLogin.userKey, profile.name, feedback, feedbackSubmitted);
+    ParticipationPresenter.setWorkshopAttendeeFeedback(eventID, workshopID, profile.profileLogin.userKey, profile.name, responseMap, feedbackSubmitted);
   }
 
   void readQuestions(Map data) {

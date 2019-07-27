@@ -74,7 +74,7 @@ class _ScreenSessionViewBuild extends State<ScreenSessionViewState> {
   Widget firstButton() {
     if (attendance.sessions.attendance.containsKey(session.ID)) {
       if (attendance.sessions.attendance[session.ID].checkedOut)
-        return null;
+        return SizedBox();
       else if (attendance.sessions.attendance[session.ID].feedback)
         return PunchRaisedButton(
           label: "Check out",

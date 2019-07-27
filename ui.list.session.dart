@@ -1,4 +1,3 @@
-
 import 'model.session.dart';
 import 'model.attendance.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +5,7 @@ import 'ui.util.dart';
 import 'controller.sessions.dart';
 import 'ui.buttons.dart';
 import 'controller.attendance.dart';
+import 'dart:ui';
 
 class EventViewSessionsBuild extends StatefulWidget {
   EventViewSessionsBuild({this.sessionHolder, this.attendanceHolder, this.isOverlaid, this.days = false, this.showSessionsButton});
@@ -111,14 +111,21 @@ class EventViewSessionState extends State<EventViewSessionsBuild> with TickerPro
                 animation: _controller2,
               ));
 
+//      child: new BackdropFilter(
+//          filter: new ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
       overlayEntry2 = OverlayEntry(
           builder: (context) => Positioned(
                 top: 0,
                 left: 0,
-                child: Container(
-                  height: medhi.height,
-                  width: medhi.width,
-                  color: AppColors.appColorMainTransparent,
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+                  child: Container(
+                    height: medhi.height,
+                    width: medhi.width,
+                    decoration: BoxDecoration(
+                      color: AppColors.appColorMainTransparent,
+                    ),
+                  ),
                 ),
               ));
       oss2.insert(overlayEntry2);

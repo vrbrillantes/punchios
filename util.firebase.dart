@@ -9,7 +9,7 @@ final dbWorkshopFeedback = FirebaseDatabase.instance.reference().child('Workshop
 final dbEventLinks = FirebaseDatabase.instance.reference().child('EventLinks');
 final dbEventCollaborators = FirebaseDatabase.instance.reference().child('EventCollaborators');
 final dbSessions = FirebaseDatabase.instance.reference().child("EventSessions");
-final dbGroups = FirebaseDatabase.instance.reference().child("EventInvitations");
+//final dbGroups = FirebaseDatabase.instance.reference().child("EventInvitations");
 final dbSubs = FirebaseDatabase.instance.reference().child("Subscriptions");
 
 final dbEventNotifications = FirebaseDatabase.instance.reference().child('EventNotifications');
