@@ -4,11 +4,13 @@ class Question {
   String userID;
   String key;
   int votes = 0;
+  bool answered;
 
   Question.retrieveQuestion(this.key, Map data) {
     name = data['Name'];
     userID = data['UserID'];
     question = data['Question'] != null ? data['Question'] : "";
+    answered = data['Answered'] != null ? true : false;
   }
 }
 

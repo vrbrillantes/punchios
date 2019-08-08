@@ -115,6 +115,7 @@ class _ScreenQuestionsBuild extends State<ScreenQuestionsState> {
       setState(() {});
     });
   }
+
   void projectQuestion(String questionid) {
     eq.setKioskQuestion(questionid);
   }
@@ -269,7 +270,7 @@ class CardItem extends StatelessWidget {
                     onTap: onAnswer,
                     child: Padding(
                       padding: EdgeInsets.all(10),
-                      child: Padding(padding: EdgeInsets.all(4), child: Icon(Icons.beenhere)),
+                      child: Padding(padding: EdgeInsets.all(4), child: Icon(Icons.beenhere, color: item.answered ? AppColors.appAccentYellow : AppColors.appGreyscaleBaseline)),
 //                      child: Padding(padding: EdgeInsets.all(4), child: Image.asset('images/vote-up@3x.png', height: 24)),
                     ),
                   )
@@ -279,7 +280,7 @@ class CardItem extends StatelessWidget {
                     onTap: onProject,
                     child: Padding(
                       padding: EdgeInsets.all(10),
-                      child: Padding(padding: EdgeInsets.all(4), child: Icon(Icons.cast)),
+                      child: Padding(padding: EdgeInsets.all(4), child: Icon(Icons.cast, color: AppColors.appGreyscaleBaseline)),
 //                      child: Padding(padding: EdgeInsets.all(4), child: Image.asset('images/vote-up@3x.png', height: 24)),
                     ),
                   )
