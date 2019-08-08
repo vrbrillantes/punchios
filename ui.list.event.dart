@@ -5,6 +5,7 @@ import 'screen.eventscaffold.dart';
 import 'ui.eventWidgets.dart';
 import 'ui.util.dart';
 import 'controller.events.dart';
+import 'controller.profile.dart';
 
 List<String> pageTitles = <String>['All events', 'Events I\'m interested in', 'My profile'];
 
@@ -22,8 +23,7 @@ class ListEvent extends StatefulWidget {
   final Map<String, EventSubscription> subscriptionList;
 
   @override
-  ListEventState createState() =>
-      ListEventState(interested: interested, onPressed: onPressed, allEvents: allEvents, subscriptionList: subscriptionList);
+  ListEventState createState() => ListEventState(interested: interested, onPressed: onPressed, allEvents: allEvents, subscriptionList: subscriptionList);
 }
 
 class ListEventState extends State<ListEvent> {
@@ -46,6 +46,7 @@ class ListEventState extends State<ListEvent> {
     allEvents.getEvents(() => setState(() {}));
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     List<Event> sortedEvents = <Event>[];
@@ -96,6 +97,7 @@ class ListEventState extends State<ListEvent> {
 class ListEventInterests extends StatelessWidget {
   ListEventInterests({
     this.selectedIndex,
+    this.subscriptionList,
     this.onPressed,
     this.allEvents,
     this.interested,
@@ -105,16 +107,33 @@ class ListEventInterests extends StatelessWidget {
   final Function(String) onPressed;
   final int selectedIndex;
   final EventListHolder allEvents;
+  final Map<String, EventSubscription> subscriptionList;
 
   @override
   Widget build(BuildContext context) {
     List<Event> sortedEvents = <Event>[];
+    List<Event> filteredEvents = <Event>[];
     allEvents.mapEventsList[selectedIndex].forEach((String key) {
       if (allEvents.allEvents.containsKey(key)) {
         sortedEvents.add(allEvents.allEvents[key]);
       }
     });
 
+    sortedEvents.sort((a, b) => a.start.datetime.compareTo(b.start.datetime));
+    sortedEvents.forEach((Event e) {
+      print (e.permittedUsers.length.toString() + "INVITATION");
+      if (e.permittedUsers.length > 0) {
+        e.permittedUsers.forEach((EventInvitation ei) {
+          print(ei.toString());
+          if (subscriptionList.containsKey(ei.invitationKey)) {
+            filteredEvents.add(e);
+            print(ei.invitationKey + "INVITATION KEY");
+          }
+        });
+      } else {
+        filteredEvents.add(e);
+      }
+    });
     return SliverList(
       delegate: SliverChildBuilderDelegate(
         (BuildContext context, int index) {
@@ -124,33 +143,24 @@ class ListEventInterests extends StatelessWidget {
               child: Text(pageTitles[selectedIndex], style: AppTextStyles.styleWhiteBold(22)),
             );
           } else {
-            return sortedEvents.length > 0
+            return filteredEvents.length > 0
                 ? EventBanner(
-                    loadEvent: sortedEvents[index - 1],
-                    onPressed: () => onPressed(sortedEvents[index - 1].eventID),
-                    onLongPress: () => interested(sortedEvents[index - 1]),
-                    isInterested: allEvents.mapEventsList[1].contains(sortedEvents[index - 1].eventID),
+                    loadEvent: filteredEvents[index - 1],
+                    onPressed: () => onPressed(filteredEvents[index - 1].eventID),
+                    onLongPress: () => interested(filteredEvents[index - 1]),
+                    isInterested: allEvents.mapEventsList[1].contains(filteredEvents[index - 1].eventID),
                   )
                 : PlaceholderBanner();
           }
         },
-        childCount: sortedEvents.length > 0 ? sortedEvents.length + 1 : 0,
+        childCount: filteredEvents.length > 0 ? filteredEvents.length + 1 : 0,
       ),
     );
   }
 }
 
 class TransformingEvent extends StatefulWidget {
-  TransformingEvent(
-      {this.onPressed,
-      this.eventPressed,
-      this.refresh,
-      this.checkInPressed,
-      this.interested,
-      this.title = "Upcoming events",
-      this.allEvents,
-      this.selectedIndex,
-      this.subscriptionList});
+  TransformingEvent({this.onPressed, this.eventPressed, this.refresh, this.checkInPressed, this.interested, this.title = "Upcoming events", this.allEvents, this.selectedIndex, this.subscriptionList});
 
   final Function(Event, Function(List<String> ls)) interested;
   final Function(Event) checkInPressed;
@@ -165,25 +175,11 @@ class TransformingEvent extends StatefulWidget {
 
   @override
   _TransformingEventBuild createState() => _TransformingEventBuild(
-      refresh: refresh,
-      interested: interested,
-      onPressed: onPressed,
-      selectedIndex: selectedIndex,
-      allEvents: allEvents,
-      checkInPressed: checkInPressed,
-      subscriptionList: subscriptionList);
+      refresh: refresh, interested: interested, onPressed: onPressed, selectedIndex: selectedIndex, allEvents: allEvents, checkInPressed: checkInPressed, subscriptionList: subscriptionList);
 }
 
 class _TransformingEventBuild extends State<TransformingEvent> with TickerProviderStateMixin {
-  _TransformingEventBuild(
-      {this.onPressed,
-      this.refresh,
-      this.checkInPressed,
-      this.interested,
-      this.title = "Upcoming events",
-      this.allEvents,
-      this.selectedIndex,
-      this.subscriptionList});
+  _TransformingEventBuild({this.onPressed, this.refresh, this.checkInPressed, this.interested, this.title = "Upcoming events", this.allEvents, this.selectedIndex, this.subscriptionList});
 
   final Function(Event, Function(List<String> ls)) interested;
   final Function(Event) checkInPressed;
@@ -265,15 +261,17 @@ class _TransformingEventBuild extends State<TransformingEvent> with TickerProvid
 }
 
 class AllListEvent extends StatelessWidget {
-  AllListEvent(
-      {this.onPressed,
-      this.refresh,
-      this.checkInPressed,
-      this.interested,
-      this.title = "Upcoming events",
-      this.allEvents,
-      this.selectedIndex,
-      this.subscriptionList});
+  AllListEvent({
+    this.onPressed,
+    this.refresh,
+    this.checkInPressed,
+    this.interested,
+    this.title = "Upcoming events",
+    this.allEvents,
+    this.selectedIndex,
+//    this.profileHolder,
+    this.subscriptionList,
+  });
 
   final Function(Event, Function(List<String> ls)) interested;
   final Function(Event) checkInPressed;
@@ -282,6 +280,8 @@ class AllListEvent extends StatelessWidget {
   final String title;
   final EventListHolder allEvents;
   final int selectedIndex;
+
+//  final ProfileHolder profileHolder;
 
   final Map<String, EventSubscription> subscriptionList;
 
@@ -302,20 +302,22 @@ class AllListEvent extends StatelessWidget {
         checkInPressed: checkInPressed,
         interested: setInterest,
       ));
-      widgets.add(ListEventInterests(
-        selectedIndex: selectedIndex,
-        allEvents: allEvents,
-        onPressed: onPressed,
-        interested: setInterest,
-      ));
-    } else {
-      widgets.add(ListEvent(
-        subscriptionList: subscriptionList,
-        allEvents: allEvents,
-        onPressed: onPressed,
-        interested: setInterest,
-      ));
+//    } else {
+//      widgets.add(ListEvent(
+//        subscriptionList: profileHolder.mySubscriptions,
+//        allEvents: allEvents,
+//        onPressed: onPressed,
+//        interested: setInterest,
+//      ));
     }
+
+    widgets.add(ListEventInterests(
+      selectedIndex: selectedIndex,
+      allEvents: allEvents,
+      onPressed: onPressed,
+      subscriptionList: subscriptionList,
+      interested: setInterest,
+    ));
 
     return CustomScrollView(slivers: widgets);
   }
@@ -335,8 +337,7 @@ class HorizontalListEvent extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Event> sortedEvents = <Event>[];
     allEvents.attendingEvents.forEach((String key) {
-      if (allEvents.allEvents.containsKey(key) && allEvents.allEvents[key].end.datetime.isAfter(DateTime.now().subtract(Duration(days: 3))))
-        sortedEvents.add(allEvents.allEvents[key]);
+      if (allEvents.allEvents.containsKey(key) && allEvents.allEvents[key].end.datetime.isAfter(DateTime.now().subtract(Duration(days: 3)))) sortedEvents.add(allEvents.allEvents[key]);
     });
     sortedEvents.sort((a, b) => a.start.datetime.compareTo(b.start.datetime));
     List<Widget> viewEvent = sortedEvents.map<Widget>((Event e) {

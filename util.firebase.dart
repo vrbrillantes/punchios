@@ -261,6 +261,11 @@ class FirebaseMethods {
         ? dbQuestions.child(eventID).child(questionID).child('Votes').child(userKey).set(true).whenComplete(onData)
         : dbSessionQuestions.child(eventID).child(sessionID).child(questionID).child('Votes').child(userKey).set(true).whenComplete(onData);
   }
+  static void setQuestionAsAnsweredByQuestionID(String eventID, String sessionID, String questionID, void onData()) {
+    sessionID == null
+        ? dbQuestions.child(eventID).child(questionID).child('Answered').set(true).whenComplete(onData)
+        : dbSessionQuestions.child(eventID).child(sessionID).child(questionID).child('Answered').set(true).whenComplete(onData);
+  }
 
   static void getFeedbackQuestionsByEventID(String eventID, void feedbackRetrieved(Map data)) {
     dbEventFeedback.child(eventID).once().then((DataSnapshot ss) => feedbackRetrieved(ss.value));

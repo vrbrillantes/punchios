@@ -67,7 +67,7 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
 
   void onlineInitState(bool s) {
     setStatus(s);
-//    eventsHolder.getEvents(() => setState(() {}));
+    eventsHolder.getEvents(() => setState(() {}));
     eventsHolder.getNotifications(() => setState(() {}));
 
     profileHolder.getOnlineAccount(setProfileSet);
@@ -158,6 +158,7 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
                           onPressed: showEvent,
                           selectedIndex: _selectedIndex,
                           allEvents: eventsHolder,
+//                          profileHolder: profileHolder,
                           checkInPressed: calendarHolder.checkIn,
                           subscriptionList: profileHolder.mySubscriptions,
                         )),

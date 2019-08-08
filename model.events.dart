@@ -13,6 +13,7 @@ class Events {
     List<EventInvitation> permittedUsers = <EventInvitation>[];
     if (data['Invitations'] != null)
       data['Invitations'].forEach((k, v) {
+        print(v + " INVITATION KEY " + k);
         permittedUsers.add(EventInvitation(invitationKey: v));
       });
 

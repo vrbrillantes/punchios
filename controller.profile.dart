@@ -113,6 +113,7 @@ class ProfileHolder {
   void getSubscriptions(void done()) {
     profile.getSubscriptions(isOnline, (Map<String, EventSubscription> ss) {
       mySubscriptions = ss;
+      print(mySubscriptions.toString() + " INVI");
       done();
     });
   }

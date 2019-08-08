@@ -83,6 +83,9 @@ class ParticipationPresenter {
   static void setVote(String eventID, String sessionID, String questionID, String userID, void done()) {
     if (userID != null) FirebaseMethods.setQuestionVoteByUserKey(eventID, sessionID, questionID, userID, done);
   }
+  static void setAsAnswered(String eventID, String sessionID, String questionID, void done()) {
+    FirebaseMethods.setQuestionAsAnsweredByQuestionID(eventID, sessionID, questionID, done);
+  }
 }
 
 class EventParticipation {
@@ -101,6 +104,9 @@ class EventParticipation {
   void setKioskQuestion(String questionID) {
     Question thisQuestion = eventQuestions[questionID];
     ParticipationPresenter.setKioskQuestion(sessionID == null ? eventID : sessionID, thisQuestion.name, thisQuestion.question);
+  }
+  void setQuestionAsAnswered(String questionID, void done()) {
+    ParticipationPresenter.setAsAnswered(eventID, sessionID, questionID, done);
   }
 
   void getQuestions(void onData(Map<String, Question> questions), void returnSS(StreamSubscription s)) {
@@ -176,11 +182,12 @@ class ParticipationHolder {
     participation = EventParticipation(eventID: event.eventID, workshopID: workshop.ID, profile: profile);
   }
 
-  void gotoQuestions() {
+  void gotoQuestions(bool isAdmin) {
     Navigator.pushNamed(
       context,
       '/questions',
       arguments: ScreenQuestionAruments(
+        isAdmin: isAdmin,
         profile: profile,
         eventID: event.eventID,
       ),

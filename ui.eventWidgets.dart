@@ -7,8 +7,7 @@ import 'util.qr.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UIElements {
-  static void modalBS(BuildContext context, String direction, void onScan(), String userKey,
-      {String eventID, String sessionID, String attendanceKey, bool waitlisted = false}) {
+  static void modalBS(BuildContext context, String direction, void onScan(), String userKey, {String eventID, String sessionID, String attendanceKey, bool waitlisted = false}) {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext context) {
@@ -44,8 +43,8 @@ class PlaceholderBannerState extends State<PlaceholderBanner> with TickerProvide
   }
 
   void confor() {
-      print("HELLO");
-      _controller2.forward(from: 0).then((_) => _controller2.reverse().then((_) => confor()));
+    print("HELLO");
+    _controller2.forward(from: 0).then((_) => _controller2.reverse().then((_) {}));
   }
 
   @override
@@ -372,8 +371,7 @@ class EventDetailsBar extends StatelessWidget {
           child: ListTile(
             title: Text(
                 loadEvent.start.day != loadEvent.end.day
-                    ? "${loadEvent.start.longmonth} ${loadEvent.start.day}-${loadEvent.end.day}, ${loadEvent.start.longyear} " +
-                        "(${loadEvent.start.shortweekday}-${loadEvent.end.shortweekday})"
+                    ? "${loadEvent.start.longmonth} ${loadEvent.start.day}-${loadEvent.end.day}, ${loadEvent.start.longyear} " + "(${loadEvent.start.shortweekday}-${loadEvent.end.shortweekday})"
                     : "${loadEvent.start.longdate} (${loadEvent.start.shortweekday})",
                 style: AppTextStyles.eventDetails),
             leading: Image.asset('images/calendar@2x.png', height: 20),
@@ -504,9 +502,7 @@ class RelatedInfoDetailsBar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: eventLinks.map<Widget>((EventLink e) {
                       return InkWell(
-                          child: Container(
-                              child: Text(e.name, style: AppTextStyles.eventLinks), padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6)),
-                          onTap: () => _launchURL(e.link));
+                          child: Container(child: Text(e.name, style: AppTextStyles.eventLinks), padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6)), onTap: () => _launchURL(e.link));
                     }).toList()),
               ),
             ],

@@ -139,7 +139,7 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
         eventHolder.sendNotifications();
         break;
       case "question":
-        participationHolder.gotoQuestions();
+        participationHolder.gotoQuestions(eventHolder.isCollaborator(profile.email));
         break;
       case "checkin":
         isAwaitingRegistration = true;
@@ -238,8 +238,7 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
 
   void scanAttendeeSession() {
     QRActions.scanCheckInAttendeeSession(
-        returnCode: (userKey, sessionID, dir) =>
-            eventAttendees.checkInSession(sessionsHolder.map[sessionID].slotID, userKey, dir, isOnline, (bool s) {
+        returnCode: (userKey, sessionID, dir) => eventAttendees.checkInSession(sessionsHolder.map[sessionID].slotID, userKey, dir, isOnline, (bool s) {
               if (s) dialog.confirmDialog(dir == "IN" ? dialog.checkedInAttendeeString : dialog.checkOutAttendeeString);
             }),
         wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
@@ -381,6 +380,18 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
                       childCount: 1,
                     ),
                   ),
+//                  SliverList(
+//                    delegate: SliverChildBuilderDelegate(
+//                      (BuildContext context, int index) => AnimatedSwitcher(
+//                            duration: const Duration(milliseconds: 500),
+//                            transitionBuilder: (Widget child, Animation<double> animation) {
+//                              return ScaleTransition(child: child, scale: animation);
+//                            },
+//                            child: selectedView == "Booths" ? ListBadges(badgesHolder, screenSize) : SizedBox(),
+//                          ),
+//                      childCount: 1,
+//                    ),
+//                  ),
                   selectedView == "Sessions"
                       ? EventViewSessionsBuild(
                           sessionHolder: sessionsHolder,

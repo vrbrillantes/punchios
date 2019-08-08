@@ -8,41 +8,45 @@ import 'util.dialog.dart';
 import 'model.participation.dart';
 import 'model.profile.dart';
 import 'controller.participation.dart';
+
 class ScreenQuestionAruments {
+  ScreenQuestionAruments({this.profile, this.eventID, this.sessionID, this.isAdmin});
+
   final String eventID;
   final Profile profile;
   final String sessionID;
-
-  ScreenQuestionAruments({this.profile, this.eventID, this.sessionID});
+  final bool isAdmin;
 }
 
 class ScreenQuestions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ScreenQuestionAruments args = ModalRoute.of(context).settings.arguments;
-    return ScreenQuestionsState(profile: args.profile, sessionID: args.sessionID, eventID: args.eventID);
+    return ScreenQuestionsState(profile: args.profile, sessionID: args.sessionID, eventID: args.eventID, isAdmin: args.isAdmin);
   }
 }
 
 class ScreenQuestionsState extends StatefulWidget {
-  ScreenQuestionsState({this.profile, this.sessionID, this.eventID});
+  ScreenQuestionsState({this.profile, this.sessionID, this.eventID, this.isAdmin});
 
+  final bool isAdmin;
   final String eventID;
   final String sessionID;
   final Profile profile;
 
   @override
-  _ScreenQuestionsBuild createState() => _ScreenQuestionsBuild(profile: profile, eventID: eventID, sessionID: sessionID);
+  _ScreenQuestionsBuild createState() => _ScreenQuestionsBuild(profile: profile, eventID: eventID, sessionID: sessionID, isAdmin: isAdmin);
 }
 
 class _ScreenQuestionsBuild extends State<ScreenQuestionsState> {
-  _ScreenQuestionsBuild({this.profile, this.eventID, this.sessionID});
+  _ScreenQuestionsBuild({this.profile, this.eventID, this.sessionID, this.isAdmin = false});
 
   GenericDialogGenerator dialog;
   StreamSubscription _subscriptionTodo;
   final String eventID;
   final String sessionID;
   final Profile profile;
+  final bool isAdmin;
   EventParticipation eq;
 
   List<String> questionKeys = <String>[];
@@ -111,10 +115,16 @@ class _ScreenQuestionsBuild extends State<ScreenQuestionsState> {
       setState(() {});
     });
   }
-
-  void kiosk(String questionID) {
-    eq.setKioskQuestion(questionID);
+  void projectQuestion(String questionid) {
+    eq.setKioskQuestion(questionid);
   }
+
+  void answered(String questionID) {
+    eq.setQuestionAsAnswered(questionID, () {
+      setState(() {});
+    });
+  }
+
   void askQuestion() {
     ScreenTextInit.doThis(
         context, dialog.askQuestionString, (String s) => eq.askQuestion(question: s, sessionID: sessionID, questionSubmitted: () => dialog.confirmDialog(dialog.questionSubmittedString)));
@@ -124,7 +134,14 @@ class _ScreenQuestionsBuild extends State<ScreenQuestionsState> {
   ListModel<dynamic> _list;
 
   Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
-    CardItem insert = CardItem(animation: animation, item: _list[index], onTap: () => vote(_list[index].key));
+    CardItem insert = CardItem(
+      animation: animation,
+      item: _list[index],
+      onTap: () => vote(_list[index].key),
+      isAdmin: isAdmin,
+      onAnswer: () => answered(_list[index].key),
+      onProject: () => projectQuestion(_list[index].key),
+    );
     return index == _list.length - 1 ? Column(children: <Widget>[insert, SizedBox(height: 80)]) : insert;
   }
 
@@ -216,13 +233,19 @@ class CardItem extends StatelessWidget {
     Key key,
     @required this.animation,
     this.onTap,
+    this.onAnswer,
+    this.onProject,
     @required this.item,
+    this.isAdmin,
   })  : assert(animation != null),
         super(key: key);
 
   final Animation<double> animation;
   final VoidCallback onTap;
+  final VoidCallback onAnswer;
+  final VoidCallback onProject;
   final Question item;
+  final bool isAdmin;
 
   @override
   Widget build(BuildContext context) {
@@ -241,16 +264,36 @@ class CardItem extends StatelessWidget {
                 child: Text(item.question, style: AppTextStyles.eventDetailsGrey),
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: Column(
-                children: <Widget>[
-                  InkWell(
-                    onTap: onTap,
-                    child: Padding(padding: EdgeInsets.all(4), child: Image.asset('images/vote-up@3x.png', height: 24)),
-                  ),
-                  item.votes > 0 ? Text("+ ${item.votes.toString()}", style: AppTextStyles.eventDetailsBold) : SizedBox(),
-                ],
+            isAdmin
+                ? InkWell(
+                    onTap: onAnswer,
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Padding(padding: EdgeInsets.all(4), child: Icon(Icons.beenhere)),
+//                      child: Padding(padding: EdgeInsets.all(4), child: Image.asset('images/vote-up@3x.png', height: 24)),
+                    ),
+                  )
+                : SizedBox(),
+            isAdmin
+                ? InkWell(
+                    onTap: onProject,
+                    child: Padding(
+                      padding: EdgeInsets.all(10),
+                      child: Padding(padding: EdgeInsets.all(4), child: Icon(Icons.cast)),
+//                      child: Padding(padding: EdgeInsets.all(4), child: Image.asset('images/vote-up@3x.png', height: 24)),
+                    ),
+                  )
+                : SizedBox(),
+            InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Column(
+                  children: <Widget>[
+                    Padding(padding: EdgeInsets.all(4), child: Image.asset('images/vote-up@3x.png', height: 24)),
+                    item.votes > 0 ? Text("+ ${item.votes.toString()}", style: AppTextStyles.eventDetailsBold) : SizedBox(),
+                  ],
+                ),
               ),
             ),
           ],
