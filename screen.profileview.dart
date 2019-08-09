@@ -44,11 +44,11 @@ class _GuestProfileBuild extends State<GuestProfileState> {
     final FormState form = _formKey.currentState;
     updatedProfile = {};
     form.save();
-    updatedProfile.length == 3 ? saveGuest(updatedProfile) : onError();
+    updatedProfile.length == 4 ? saveGuest(updatedProfile) : onError();
   }
 
   void saveValue(String key, String value) {
-    if (value != "" && value != " " && !RegExp(r'[^0-9A-Za-z,.\/-\s]').hasMatch(value)) updatedProfile[key] = value;
+    if (value != "" && value != " " && !RegExp(r'[^0-9A-Za-z\/\s&+,.-]').hasMatch(value)) updatedProfile[key] = value;
   }
 
   @override
@@ -130,30 +130,34 @@ TextEditingController groupController = TextEditingController();
 TextEditingController divisionController = TextEditingController();
 TextEditingController companyController = TextEditingController();
 TextEditingController positionController = TextEditingController();
+TextEditingController mobileController = TextEditingController();
 TextEditingController deptController = TextEditingController();
 TextEditingController idNumberController = TextEditingController();
 TextEditingController firstNameController = TextEditingController();
 
 class ProfileForm extends StatefulWidget {
-  ProfileForm({this.profile, this.dialog, this.profileSet, this.isProfileSet});
+  ProfileForm({this.profile, this.dialog, this.profileSet, this.isProfileSet, this.subscriptions});
 
+  final Map<String, EventSubscription> subscriptions;
   final bool isProfileSet;
   final Profile profile;
   final GenericDialogGenerator dialog;
   final Function(bool) profileSet;
 
   @override
-  _ProfileFormBuild createState() => new _ProfileFormBuild(isProfileSet: isProfileSet, profile: profile, dialog: dialog, profileSet: profileSet);
+  _ProfileFormBuild createState() => new _ProfileFormBuild(isProfileSet: isProfileSet, profile: profile, dialog: dialog, profileSet: profileSet, subscriptions: subscriptions);
 }
 
 class _ProfileFormBuild extends State<ProfileForm> {
-  _ProfileFormBuild({this.profile, this.dialog, this.profileSet, this.isProfileSet});
+  _ProfileFormBuild({this.profile, this.dialog, this.profileSet, this.isProfileSet, this.subscriptions});
 
   @override
   void initState() {
     isEditing = !isProfileSet;
     super.initState();
   }
+
+  final Map<String, EventSubscription> subscriptions;
   final bool isProfileSet;
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   final Profile profile;
@@ -217,6 +221,7 @@ class _ProfileFormBuild extends State<ProfileForm> {
         companyController.text = profile.company;
         positionController.text = profile.position;
         idNumberController.text = profile.idNumber;
+        mobileController.text = profile.mobile;
         myFocusNode.addListener(inFocus);
       }
     });
@@ -274,6 +279,7 @@ class _ProfileFormBuild extends State<ProfileForm> {
                                 SizedBox(height: 36),
                                 StyledTextFormField(editingController: companyController, field: "Company", action: profile.updateProfileDetails, label: "Company"),
                                 StyledTextFormField(editingController: positionController, field: "Position", action: profile.updateProfileDetails, label: "Position/Title"),
+                                StyledTextFormField(editingController: mobileController, field: "Mobile", action: profile.updateProfileDetails, label: "Mobile number"),
                                 SizedBox(height: 36),
                               ],
                             ),
@@ -289,6 +295,13 @@ class _ProfileFormBuild extends State<ProfileForm> {
           },
           childCount: 4,
         ),
+      ),
+      SliverList(
+        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+          return ListTile(
+            title: Text(subscriptions.values.toList()[index].subName, style: AppTextStyles.styleWhite(12),),
+          );
+        }, childCount: subscriptions.length),
       )
     ]);
   }
@@ -325,6 +338,7 @@ class OutsiderProfile extends StatelessWidget {
       children: <Widget>[
         LabelText(label: 'Company', value: profile.company),
         LabelText(label: 'Position/Title', value: profile.position),
+        LabelText(label: 'Mobile Number', value: profile.mobile),
       ],
     );
   }

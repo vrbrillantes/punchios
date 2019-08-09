@@ -147,6 +147,7 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
                   : ((_selectedIndex == 2 || profileSet == false)
                       ? ProfileForm(
                           profile: profileHolder.profile,
+                          subscriptions: profileHolder.mySubscriptions,
                           dialog: eventsHolder.dialog,
                           isProfileSet: profileSet,
                           profileSet: setProfileSet,

@@ -59,6 +59,7 @@ class Profile {
 
   String company = "";
   String position = "";
+  String mobile = "";
   String group = "";
   String division = "";
   String department = "";
@@ -102,7 +103,7 @@ class Profile {
   }
 
   void saveDetails(void done(bool s)) {
-    if (updatedProfile.length == (email.endsWith("@globe.com.ph") ? 6 : 4)) {
+    if (updatedProfile.length == (email.endsWith("@globe.com.ph") ? 6 : 5)) {
       email.endsWith("@globe.com.ph") ? readEdits(updatedProfile) : readEditsOutsider(updatedProfile);
       setOnlineProfile(() => done(true));
     } else {
@@ -115,7 +116,7 @@ class Profile {
   }
 
   void updateProfileDetails(String key, String value) {
-    if (value != "" && value != " " && !RegExp(r'[^0-9A-Za-z,.\/-\s]').hasMatch(value)) updatedProfile[key] = value;
+    if (value != "" && value != " " && !RegExp(r'[^0-9A-Za-z\/\s&+,.-]').hasMatch(value)) updatedProfile[key] = value;
   }
 
   void setOnlineProfile(void done()) {
@@ -172,6 +173,7 @@ class Profile {
     userMap['Division'] = division;
 
     userMap['Position'] = position;
+    userMap['Mobile'] = mobile;
     userMap['Company'] = company;
     userMap['Group'] = group;
     userMap['ID Number'] = idNumber;
@@ -193,6 +195,7 @@ class Profile {
     lastName = data['Last'];
     company = data['Company'];
     position = data['Position'];
+    mobile = data['Mobile'];
     name = "$firstName $lastName";
   }
 
@@ -205,6 +208,7 @@ class Profile {
     email = data['email'] != null ? data['email'] : "";
     company = data['Company'] != null ? data['Company'] : "";
     position = data['Position'] != null ? data['Position'] : "";
+    mobile = data['Mobile'] != null ? data['Mobile'] : "";
     group = data['Group'] != null ? data['Group'] : "";
     division = data['Division'] != null ? data['Division'] : "";
     department = data['Department'] != null ? data['Department'] : "";
