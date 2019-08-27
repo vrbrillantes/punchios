@@ -7,6 +7,12 @@ class FeedbackQuestions {
     });
   }
 
+  FeedbackQuestions.forRegistration(String eventID, void feedbackRetrieved(List<FeedbackQuestion> qq)) {
+    FeedbackPresenter.getFeedbackRegistration(eventID, (Map data) {
+      parseFeedback(data);
+      feedbackRetrieved(parseFeedback(data));
+    });
+  }
   FeedbackQuestions.forSessionsfromFirebase(String eventID, void feedbackRetrieved(List<FeedbackQuestion> qq)) {
     FeedbackPresenter.getFeedbackSessions(eventID, (Map data) {
       parseFeedback(data);

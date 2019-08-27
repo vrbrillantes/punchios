@@ -126,7 +126,7 @@ class EventSessions {
 
   Map<String, Workshop> getFirebaseWorkshops(Map data, String eventID) {
     Map<String, Workshop> eventWorkshops = {};
-    if (data != null) {
+    if (data['Workshops'] != null) {
       data['Workshops'].forEach((kk, vv) {
         Workshop newWorkshop = Workshop.fromFirebase(kk, eventID, vv);
         eventWorkshops[newWorkshop.ID] = newWorkshop;
@@ -159,7 +159,7 @@ class EventSessions {
 
   Map<String, Track> getEventTracks(Map data) {
     Map<String, Track> eventTracks = {};
-    if (data != null) {
+    if (data['Tracks'] != null) {
       data['Tracks'].forEach((k, v) {
         Track newSlot = Track.fromFirebase(k, v);
         eventTracks[k] = newSlot;

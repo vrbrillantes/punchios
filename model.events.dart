@@ -13,7 +13,6 @@ class Events {
     List<EventInvitation> permittedUsers = <EventInvitation>[];
     if (data['Invitations'] != null)
       data['Invitations'].forEach((k, v) {
-        print(v + " INVITATION KEY " + k);
         permittedUsers.add(EventInvitation(invitationKey: v));
       });
 
@@ -70,6 +69,7 @@ class Event {
   final String eventID;
 
   bool isToday = false;
+  bool regQuestions = false;
   EventDetails eventDetails;
   PunchDate start;
   PunchDate end;
@@ -78,9 +78,10 @@ class Event {
 
   Event.fromFirebase(this.eventID, data) {
     eventMap = data;
-    end = data['EndDate'] != null ? PunchDate.initDBTime(data['EndDate']) : PunchDate.initDBTime(data['StartDate']);
-    start = PunchDate.initDBTime(data['StartDate']);
-    eventDetails = EventDetails.fromFirebase(data);
+    regQuestions = data['RegQuestions'] != null ? data['RegQuestions'] : false;
+    start = PunchDate.initDBTime(data['Details']['StartDate']);
+    end = PunchDate.initDBTime(data['Details']['EndDate']);
+    eventDetails = EventDetails.fromFirebase(data['Details']);
     permittedUsers = Events.readPermittedUsers(data);
     isToday = (-12 < DateTime.now().difference(start.datetime).inHours && DateTime.now().difference(start.datetime).inHours < 12);
   }

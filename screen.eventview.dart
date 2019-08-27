@@ -149,7 +149,7 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
         attendanceHolder.checkOut();
         break;
       case "register":
-        attendanceHolder.register();
+        loadEvent.regQuestions ? participationHolder.sendRegistrationQuestions(attendanceHolder.register) : attendanceHolder.register();
         break;
       case "cancel":
         attendanceHolder.cancel(() => setState(() {}));

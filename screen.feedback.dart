@@ -7,41 +7,45 @@ import 'model.feedback.dart';
 import 'ui_starrating.dart';
 
 class ScreenFeedback extends StatelessWidget {
-  ScreenFeedback({this.eventKey, this.eventName, this.editable, this.session = false, this.workshop = false});
+  ScreenFeedback({this.eventKey, this.eventName, this.editable, this.session = false, this.workshop = false, this.registration = false});
 
   final String eventKey;
   final String eventName;
   final bool workshop;
   final bool session;
   final bool editable;
+  final bool registration;
 
   @override
   Widget build(BuildContext context) {
-    return ScreenTextDialogState(eventKey: eventKey, eventName: eventName, editable: editable, workshop: workshop, session: session);
+    return ScreenTextDialogState(eventKey: eventKey, eventName: eventName, editable: editable, workshop: workshop, session: session, registration: registration);
   }
 }
 
 class ScreenTextDialogState extends StatefulWidget {
-  ScreenTextDialogState({this.eventKey, this.eventName, this.editable, this.session, this.workshop});
+  ScreenTextDialogState({this.eventKey, this.eventName, this.editable, this.session, this.workshop, this.registration});
 
   final String eventKey;
   final String eventName;
   final bool editable;
   final bool workshop;
   final bool session;
+  final bool registration;
 
   @override
-  _ScreenTextDialogBuild createState() => _ScreenTextDialogBuild(eventKey: eventKey, eventName: eventName, editable: editable, workshop: workshop, session: session);
+  _ScreenTextDialogBuild createState() => _ScreenTextDialogBuild(eventKey: eventKey, eventName: eventName, editable: editable, workshop: workshop, session: session, registration: registration);
 }
 
 class _ScreenTextDialogBuild extends State<ScreenTextDialogState> {
-  _ScreenTextDialogBuild({this.eventKey, this.eventName, this.editable, this.session, this.workshop});
+  _ScreenTextDialogBuild({this.eventKey, this.eventName, this.editable, this.session, this.workshop, this.registration});
 
   final String eventKey;
   final String eventName;
 
   final bool session;
   final bool workshop;
+  final bool registration;
+
   List<FeedbackQuestion> questionList;
   List<FeedbackQuestion> editList;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -53,7 +57,9 @@ class _ScreenTextDialogBuild extends State<ScreenTextDialogState> {
     super.initState();
     session
         ? FeedbackQuestions.forSessionsfromFirebase(eventKey, refreshLists)
-        : workshop ? FeedbackQuestions.forWorkshopsFromFirebase(eventKey, refreshLists) : FeedbackQuestions.fromFirebase(eventKey, refreshLists);
+        : workshop
+            ? FeedbackQuestions.forWorkshopsFromFirebase(eventKey, refreshLists)
+            : registration ? FeedbackQuestions.forRegistration(eventKey, refreshLists) : FeedbackQuestions.fromFirebase(eventKey, refreshLists);
   }
 
   void refreshLists(List<FeedbackQuestion> ll) {

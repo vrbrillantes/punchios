@@ -13,25 +13,25 @@ class QuestionPresenter {
     FirebaseMethods.getEventQuestionsByEventIDRefresh(eid, sid, done).then(returnSS);
   }
 
-  static void setEventQuestion(String eventID, String sessionID, String userID, String name, String question, void questionSubmitted()) {
-    FirebaseMethods.setEventQuestion(
-      eventID,
-      sessionID,
-      {
-        'Name': name,
-        'UserID': userID,
-        'Photo': "",
-        "Question": question,
-        "QuestionKey": eventID,
-        "Time": DateTime.now().toString(),
-      },
-      questionSubmitted,
-    );
-  }
+//  static void setEventQuestion(String eventID, String sessionID, String userID, String name, String question, void questionSubmitted()) {
+//    FirebaseMethods.setEventQuestion(
+//      eventID,
+//      sessionID,
+//      {
+//        'Name': name,
+//        'UserID': userID,
+//        'Photo': "",
+//        "Question": question,
+//        "QuestionKey": eventID,
+//        "Time": DateTime.now().toString(),
+//      },
+//      questionSubmitted,
+//    );
+//  }
 
-  static void setVote(String eventID, String sessionID, String questionID, String userID, void done()) {
-    FirebaseMethods.setQuestionVoteByUserKey(eventID, sessionID, questionID, userID, done);
-  }
+//  static void setVote(String eventID, String sessionID, String questionID, String userID, void done()) {
+//    FirebaseMethods.setQuestionVoteByUserKey(eventID, sessionID, questionID, userID, done);
+//  }
 }
 class FeedbackPresenter {
   static void getFeedback(String eventID, void feedbackRetrieved(Map data)) {
@@ -45,6 +45,11 @@ class FeedbackPresenter {
       if (data != null) feedbackRetrieved(data);
     });
   }
+  static void getFeedbackRegistration(String eventID, void feedbackRetrieved(Map data)) {
+    FirebaseMethods.getRegistrationQuestionsByEventID(eventID, (Map data) {
+      if (data != null) feedbackRetrieved(data);
+    });
+  }
   static void getFeedbackWorkshops(String eventID, void feedbackRetrieved(Map data)) {
     FirebaseMethods.getWorkshopFeedbackQuestionsByEventID(eventID, (Map data) {
       if (data != null) feedbackRetrieved(data);
@@ -55,6 +60,11 @@ class ParticipationPresenter {
   static void setEventAttendeeFeedback(String eventID, String userID, String name, List<dynamic> responseMap, void feedbackSubmitted()) {
     Map data = {'Feedback': responseMap, 'UserID': userID, 'FeedbackKey': eventID, 'Name': name, 'Time': DateTime.now().toString()};
     if (userID != null) FirebaseMethods.setFeedbackAnswers(eventID, userID, data, feedbackSubmitted);
+  }
+
+  static void setEventRegistrationQuestions(String eventID, String userID, String name, List<dynamic> responseMap, void feedbackSubmitted()) {
+    Map data = {'Feedback': responseMap, 'UserID': userID, 'FeedbackKey': eventID, 'Name': name, 'Time': DateTime.now().toString()};
+    if (userID != null) FirebaseMethods.setAnswerRegistration(eventID, userID, data, feedbackSubmitted);
   }
 
   static void setSessionAttendeeFeedback(String eventID, String sessionID, String userID, String name, List<dynamic> responseMap, void feedbackSubmitted()) {
@@ -76,8 +86,8 @@ class ParticipationPresenter {
   }
 
   static void setEventQuestion(String eventID, String sessionID, String userID, String name, String question, void questionSubmitted()) {
-    Map data = {'Name': name, 'UserID': userID, 'Photo': "", "Question": question, "QuestionKey": eventID, "Time": DateTime.now().toString()};
-    FirebaseMethods.setEventQuestion(eventID, sessionID, data, questionSubmitted);
+    Map data = {'Name': name, 'UserID': userID, 'Photo': "", "Question": question, "QuestionKey": sessionID != null ? sessionID : eventID, "Time": DateTime.now().toString()};
+    FirebaseMethods.setEventQuestion(eventID, data, questionSubmitted);
   }
 
   static void setVote(String eventID, String sessionID, String questionID, String userID, void done()) {
@@ -120,6 +130,11 @@ class EventParticipation {
     List<dynamic> responseMap = <dynamic>[];
     feedback.forEach((Response r) => responseMap.add(r.responseMap));
     ParticipationPresenter.setEventAttendeeFeedback(eventID, profile.profileLogin.userKey, profile.name, responseMap, feedbackSubmitted);
+  }
+  void sendRegistrationQuestions(List<Response> feedback, void feedbackSubmitted()) {
+    List<dynamic> responseMap = <dynamic>[];
+    feedback.forEach((Response r) => responseMap.add(r.responseMap));
+    ParticipationPresenter.setEventRegistrationQuestions(eventID, profile.profileLogin.userKey, profile.name, responseMap, feedbackSubmitted);
   }
 
   void sendSessionFeedback(List<Response> feedback, void feedbackSubmitted()) {
@@ -241,6 +256,22 @@ class ParticipationHolder {
       participation.sendFeedback(responseList, () {
         feedbackSent();
         dialog.confirmDialog(dialog.feedbackSubmittedString);
+      });
+  }
+
+  void sendRegistrationQuestions(void feedbackSent()) async {
+    List<Response> responseList = await Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ScreenFeedback(
+              editable: false,
+              registration: true,
+              eventKey: event.eventID,
+              eventName: event.eventDetails.name,
+            )));
+    if (responseList != null)
+      participation.sendRegistrationQuestions(responseList, () {
+        feedbackSent();
       });
   }
 

@@ -52,7 +52,7 @@ class _ScreenWorkshopViewBuild extends State<ScreenWorkshopViewState> {
   }
 
   void showQA() {
-    Navigator.pushNamed(context, '/questions', arguments: ScreenQuestionAruments(profile: attendance.profile, eventID: workshop.eventID, sessionID: workshop.ID));
+    Navigator.pushNamed(context, '/questions', arguments: ScreenQuestionAruments(profile: attendance.profile, eventID: workshop.eventID, sessionID: workshop.ID, isAdmin: false));
   }
 
   void setTime() {

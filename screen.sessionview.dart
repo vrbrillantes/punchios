@@ -56,7 +56,7 @@ class _ScreenSessionViewBuild extends State<ScreenSessionViewState> {
   }
 
   void showQA() {
-    Navigator.pushNamed(context, '/questions', arguments: ScreenQuestionAruments(profile: attendance.profile, eventID: session.eventID, sessionID: session.ID));
+    Navigator.pushNamed(context, '/questions', arguments: ScreenQuestionAruments(profile: attendance.profile, eventID: session.eventID, sessionID: session.ID, isAdmin: false));
   }
 
   void setTime() {

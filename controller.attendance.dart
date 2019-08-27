@@ -212,6 +212,7 @@ class AttendanceHolder {
   }
 
   void register({bool checkedIn = false}) {
+//    FeedbackQuestions.forRegistration(event.eventID, checkedIn);
     AttendancePresenter.setAttendance(checkedIn, event.eventID, userKey, (Map data) {
       attendance.readAttendance(data);
       dialog.confirmDialog(checkedIn ? dialog.checkedInString(event.eventDetails.name) : dialog.registeredString(event.eventDetails.name));
