@@ -19,7 +19,6 @@ class _ScreenHomeBuild extends State<ScreenHomeState> with SingleTickerProviderS
   bool isLoggedIn = false;
   bool hasBoardingPass = false;
   bool showGuest = false;
-//  List<dynamic> boardingPassList;
 
   @override
   void initState() {
@@ -95,9 +94,6 @@ class _ClickCounterState extends State<ClickCounter> {
               },
               child: Text(
                 '$_count',
-                // This key causes the AnimatedSwitcher to interpret this as a "new"
-                // child each time the count changes, so that it will begin its animation
-                // when the count changes.
                 key: ValueKey<int>(_count),
                 style: Theme.of(context).textTheme.display1,
               ),

@@ -36,7 +36,7 @@ final dbEarnedBadges = FirebaseDatabase.instance.reference().child("EarnedBadges
 final dbEventBadges = FirebaseDatabase.instance.reference().child("EventBadges");
 final dbKiosk = FirebaseDatabase.instance.reference().child('Kiosk');
 final dbVars = FirebaseDatabase.instance.reference().child('Vars');
-
+//final dbFiles = FirebaseDatabase.instance.reference().child('FilesSystem');
 class FirebaseMethods {
   static void getAppVersion(String version, void onData(Map data)) {
     dbVars.child(version).once().then((DataSnapshot ss) => onData(ss.value));
@@ -53,6 +53,9 @@ class FirebaseMethods {
   static void getSubsByUserKey(String userKey, void onData(Map data)) {
     dbSubs.child(userKey).once().then((DataSnapshot ss) => onData(ss.value));
   }
+//  static void getFile(void onData(Map data)) {
+//    dbFiles.once().then((DataSnapshot ss) => onData(ss.value));
+//  }
 
   static void getSessionsByEventID(String eventID, void onData(Map data)) {
     dbSessions.child(eventID).once().then((DataSnapshot ss) => onData(ss.value));

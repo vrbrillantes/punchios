@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'ui.backdrop.dart';
 import 'ui.list.event.dart';
 import 'ui.util.dart';
@@ -33,6 +34,7 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
   bool profileSet = true;
   PunchInternetUtils netUtils;
 
+//  String imagen;
   @override
   void initState() {
     punchPrefs = PunchPreferences.init(() => setState(() {}));
@@ -67,6 +69,10 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
 
   void onlineInitState(bool s) {
     setStatus(s);
+//    eventsHolder.getFile((sss) => setState(() {
+//      imagen = sss;
+//
+//    }));
     eventsHolder.getEvents(() => setState(() {}));
     eventsHolder.getNotifications(() => setState(() {}));
 
@@ -187,6 +193,7 @@ class _ScreenEventsBuild extends State<ScreenEventsState> with TickerProviderSta
                                   ))
                               .toList()),
                     )),
+//                Image.memory(base64Decode(imagen)),
               ],
             ),
           ),

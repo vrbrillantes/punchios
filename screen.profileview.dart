@@ -296,13 +296,13 @@ class _ProfileFormBuild extends State<ProfileForm> {
           childCount: 4,
         ),
       ),
-      SliverList(
-        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
-          return ListTile(
-            title: Text(subscriptions.values.toList()[index].subName, style: AppTextStyles.styleWhite(12),),
-          );
-        }, childCount: subscriptions.length),
-      )
+//      SliverList(
+//        delegate: SliverChildBuilderDelegate((BuildContext context, int index) {
+//          return ListTile(
+//            title: Text(subscriptions.values.toList()[index].subName, style: AppTextStyles.styleWhite(12),),
+//          );
+//        }, childCount: subscriptions.length),
+//      )
     ]);
   }
 }

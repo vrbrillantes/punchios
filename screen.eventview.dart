@@ -97,6 +97,7 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
   void onlineInitState(bool s) {
     setStatus(s);
     setStatus(s);
+
     eventHolder.getCollaborators(() => setState(() {}));
     eventHolder.getLinks(() => setState(() {}));
     attendanceHolder.getAttendance((bool isRegistered) {

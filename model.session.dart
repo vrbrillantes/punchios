@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'model.date.dart';
 import 'package:flutter/material.dart';
 
@@ -94,17 +96,22 @@ class Track {
   Track.fromFirebase(this.ID, data) {
     name = data['Name'];
     minCompletion = data['MinCompletion'] == null ? 10 : data['MinCompletion'];
-    image = data['Image'] == null
+    image = data['Image64'] == null
         ? Image.asset(
             'images/badges-complete@2x.png',
             width: 60,
             fit: BoxFit.fitWidth,
           )
-        : Image.network(
-            data['Image'],
+        : Image.memory(
+            base64Decode(data['Image64']),
             width: 60,
             fit: BoxFit.fitWidth,
           );
+//        : Image.network(
+//            data['Image'],
+//            width: 60,
+//            fit: BoxFit.fitWidth,
+//          );
   }
 
   void addWorkshop(Workshop ss) {
@@ -148,7 +155,7 @@ class EventSessions {
 
   Map<String, Slot> getEventSlots(Map data) {
     Map<String, Slot> eventSlots = {};
-    if (data != null&& data['Slots'] != null) {
+    if (data != null && data['Slots'] != null) {
       data['Slots'].forEach((k, v) {
         Slot newSlot = Slot.fromFirebase(k, v);
         eventSlots[k] = newSlot;

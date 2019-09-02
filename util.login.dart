@@ -38,38 +38,25 @@ class LoginFunctions {
 
   void checkSignIn(
     void changeStatus(String s),
-    void loggedIn(),
-    void noAccount(),
+    void loggedIn(bool bb),
   ) async {
     void processGSIAccount(GoogleSignInAccount gsi) {
       if (gsi != null) {
-        changeStatus("GSI IS NOT NULL");
-        firebaseAuth(gsi, () {
-          changeStatus("FIREBASE AUTH DONE");
-          setupFCM(() {
-            changeStatus("FCM DONE");
-            Profile.saveCredentials(_googleSignIn, (bool s) {
-              changeStatus("SAVE CREDENTIALS DONE");
-              loggedIn();
-            });
-          });
-        });
-//        firebaseAuth(gsi, () => setupFCM(() => Profile.saveCredentials(_googleSignIn, (bool s) => loggedIn())));
+        firebaseAuth(gsi, () => setupFCM(() => Profile.saveCredentials(_googleSignIn, (bool s) => loggedIn(true))));
       } else {
-        noAccount();
+        loggedIn(false);
       }
     }
 
     void initListeners() {
-      noAccount();
+      loggedIn(false);
       _googleSignIn.onCurrentUserChanged.listen(processGSIAccount);
-//      _googleSignIn.signInSilently().then(processGSIAccount);
     }
 
     FirebaseUser user = await _auth.currentUser();
     if (user != null && user.email != null) {
       myLogin.getOfflineLoginData(() {
-        myLogin.fcm != null ? loggedIn() : initListeners();
+        myLogin.fcm != null ? loggedIn(true) : initListeners();
       });
     } else {
       initListeners();
@@ -78,7 +65,7 @@ class LoginFunctions {
 
   Future<void> googleSignIn() async {
     try {
-      await _googleSignIn.signOut();
+//      await _googleSignIn.signOut();
       await _googleSignIn.signIn();
     } catch (error) {
       print(error);

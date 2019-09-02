@@ -73,6 +73,11 @@ class EventListHolder {
   }
 
 
+//  void getFile(void sss(String i)) {
+//    EventPresenter.getFile((data) {
+//      sss(data['HELLO']);
+//    });
+//  }
   void readNotification(String pn) {
     myNotifications.readNotification(myNotifications.allNotifications[pn]);
   }
@@ -226,6 +231,9 @@ class EventPresenter {
       eventsRetrieved(data);
     });
   }
+//  static void getFile(void image(Map data)) {
+//    FirebaseMethods.getFile(image);
+//  }
 
   static void sendNotification(String eid, String m, void done()) {
     FirebaseMethods.setAttendeeNotificationByEventID(eid, m, done);

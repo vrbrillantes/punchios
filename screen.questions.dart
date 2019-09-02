@@ -99,9 +99,21 @@ class _ScreenQuestionsBuild extends State<ScreenQuestionsState> {
     return CardItem(
       animation: animation,
       item: item,
+      isAdmin: isAdmin,
     );
   }
 
+  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+    CardItem insert = CardItem(
+      animation: animation,
+      item: _list[index],
+      onTap: () => vote(_list[index].key),
+      isAdmin: isAdmin,
+      onAnswer: () => answered(_list[index].key),
+      onProject: () => projectQuestion(_list[index].key),
+    );
+    return index == _list.length - 1 ? Column(children: <Widget>[insert, SizedBox(height: 80)]) : insert;
+  }
   @override
   void dispose() {
     if (_subscriptionTodo != null) {
@@ -134,17 +146,6 @@ class _ScreenQuestionsBuild extends State<ScreenQuestionsState> {
   final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   ListModel<dynamic> _list;
 
-  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
-    CardItem insert = CardItem(
-      animation: animation,
-      item: _list[index],
-      onTap: () => vote(_list[index].key),
-      isAdmin: isAdmin,
-      onAnswer: () => answered(_list[index].key),
-      onProject: () => projectQuestion(_list[index].key),
-    );
-    return index == _list.length - 1 ? Column(children: <Widget>[insert, SizedBox(height: 80)]) : insert;
-  }
 
   @override
   Widget build(BuildContext context) {
