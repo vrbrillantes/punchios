@@ -96,22 +96,22 @@ class Track {
   Track.fromFirebase(this.ID, data) {
     name = data['Name'];
     minCompletion = data['MinCompletion'] == null ? 10 : data['MinCompletion'];
-    image = data['Image64'] == null
+    image = data['Image'] == null
         ? Image.asset(
             'images/badges-complete@2x.png',
             width: 60,
             fit: BoxFit.fitWidth,
           )
-        : Image.memory(
-            base64Decode(data['Image64']),
-            width: 60,
-            fit: BoxFit.fitWidth,
-          );
-//        : Image.network(
-//            data['Image'],
+//        : Image.memory(
+//            base64Decode(data['Image64']),
 //            width: 60,
 //            fit: BoxFit.fitWidth,
 //          );
+        : Image.network(
+            data['Image'],
+            width: 60,
+            fit: BoxFit.fitWidth,
+          );
   }
 
   void addWorkshop(Workshop ss) {

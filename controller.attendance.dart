@@ -269,11 +269,15 @@ class AttendanceHolder {
       else
         dialog.confirmDialog(dialog.sessionNotAllowed);
     } else {
-      dialog.choiceDialog(dialog.transferAttendanceString,
-          onYes: () => registerSession(session, () {
-                done();
-                checkAttendance(session);
-              }));
+      registerSession(session, () {
+        done();
+        checkAttendance(session);
+      });
+//      dialog.choiceDialog(dialog.transferAttendanceString,
+//          onYes: () => registerSession(session, () {
+//                done();
+//                checkAttendance(session);
+//              }));
     }
   }
 
