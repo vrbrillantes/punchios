@@ -167,9 +167,6 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
       case "showScanned":
         showScanned();
         break;
-      case "scanSession":
-        scanAttendeeSession();
-        break;
       case "scan":
         scanAttendee();
         break;
@@ -234,16 +231,19 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
             : eventAttendees.checkOut(s, isOnline, (bool s) {
                 if (s) dialog.confirmDialog(dialog.checkOutAttendeeString);
               }),
-        wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
-  }
-
-  void scanAttendeeSession() {
-    QRActions.scanCheckInAttendeeSession(
-        returnCode: (userKey, sessionID, dir) => eventAttendees.checkInSession(sessionsHolder.map[sessionID].slotID, userKey, dir, isOnline, (bool s) {
+        returnCodeSession: (userKey, sessionID, dir) => eventAttendees.checkInSession(sessionsHolder.map[sessionID].slotID, userKey, dir, isOnline, (bool s) {
               if (s) dialog.confirmDialog(dir == "IN" ? dialog.checkedInAttendeeString : dialog.checkOutAttendeeString);
             }),
         wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
   }
+
+//  void scanAttendeeSession() {
+//    QRActions.scanCheckInAttendeeSession(
+//        returnCode: (userKey, sessionID, dir) => eventAttendees.checkInSession(sessionsHolder.map[sessionID].slotID, userKey, dir, isOnline, (bool s) {
+//              if (s) dialog.confirmDialog(dir == "IN" ? dialog.checkedInAttendeeString : dialog.checkOutAttendeeString);
+//            }),
+//        wrongQR: () => dialog.confirmDialog(dialog.wrongQRString));
+//  }
 
   Future<bool> checkOverlay() {
     if (isOverlaid == false) {
@@ -308,7 +308,7 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
                   ),
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
-                      (BuildContext context, int index) {
+                          (BuildContext context, int index) {
                         if (index == 0)
                           return Container(
                             color: AppColors.appColorWhite,
@@ -325,11 +325,11 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
                                   sessionsHolder.hasSessions() ? SessionDetailsBar(onPressed: gotoSessions) : SizedBox(),
                                   showShowMore
                                       ? Row(
-                                          mainAxisAlignment: MainAxisAlignment.end,
-                                          children: <Widget>[
-                                            PunchOSFlatButton(onPressed: toggleDetails, label: "Show more", bold: true),
-                                          ],
-                                        )
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: <Widget>[
+                                      PunchOSFlatButton(onPressed: toggleDetails, label: "Show more", bold: true),
+                                    ],
+                                  )
                                       : SizedBox(),
                                   SizeTransition(
                                     sizeFactor: animation2,

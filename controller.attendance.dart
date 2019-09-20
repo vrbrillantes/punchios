@@ -28,6 +28,11 @@ class AttendeeHolder {
         ? AttendancePresenter.setAttendance(true, eventID, userKey, (Map data) => checkInResult(data['Status']))
         : AttendancePresenter.setScannedAttendees(eventID, addScannedAttendee(userKey, "IN"));
   }
+  void checkOut(String userKey, bool isOnline, void checkInResult(bool r)) {
+    isOnline
+        ? AttendancePresenter.checkout(eventID, userKey, (Map data) => checkInResult(data['Checkout']))
+        : AttendancePresenter.setScannedAttendees(eventID, addScannedAttendee(userKey, "OUT"));
+  }
 
   void checkInSession(String slotID, String userKey, String direction, bool isOnline, void checkInResult(bool r)) {
     isOnline ? AttendancePresenter.selfSetSessionAttendance(eventID, userKey, slotID, direction, () {}) : print("DO THIS"); //TODO WSS
@@ -36,11 +41,6 @@ class AttendeeHolder {
   Map<dynamic, dynamic> addScannedAttendee(String userKey, String direction) {
     scannedAttendees[userKey] = {'time': DateTime.now().toString(), 'direction': direction};
     return scannedAttendees;
-  }
-  void checkOut(String userKey, bool isOnline, void checkInResult(bool r)) {
-    isOnline
-        ? AttendancePresenter.checkout(eventID, userKey, (Map data) => checkInResult(data['Checkout']))
-        : AttendancePresenter.setScannedAttendees(eventID, addScannedAttendee(userKey, "OUT"));
   }
 
   void getFirebase(bool isOnline, void attendeesRetrieved()) {

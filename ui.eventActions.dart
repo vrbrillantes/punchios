@@ -171,7 +171,7 @@ class AdminButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     List<TableRow> actions = <TableRow>[];
     actions.add(TableRow(children: <Widget>[
-      AdminActionButtons('Scan Session', Icons.camera_enhance, onPressed: () => onPress('scanSession')),
+      AdminActionButtons('No action', Icons.do_not_disturb, onPressed: null),
       AdminActionButtons('Collab', Icons.people, onPressed: () => onPress('collab')),
       AdminActionButtons('Notif', Icons.notifications, onPressed: () => onPress('notif')),
     ]));

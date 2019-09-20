@@ -3,22 +3,39 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/material.dart';
 
 class QRGenerator {
-  static Widget attendeeEventQR(
-      {String eventID, String userKey, String direction}) {
+  static Widget attendeeEventQR({String eventID, String userKey, String direction}) {
     return QRBuild("CA|$userKey|$eventID|$direction");
   }
 
-  static Widget attendeeSessionQR(
-      {String userKey, String sessionID, String direction}) {
+  static Widget attendeeSessionQR({String userKey, String sessionID, String direction}) {
     return QRBuild("SA|$userKey|$sessionID|$direction");
   }
-  static Widget attendeeWorkshopQR(
-      {String userKey, String attendanceKey, String direction}) {
+
+  static Widget attendeeWorkshopQR({String userKey, String attendanceKey, String direction}) {
     return QRBuild("WA|$userKey|$attendanceKey|$direction");
   }
 }
 
 class QRActions {
+  static void scanCheckInAttendee({String eventID, void returnCode(String session, String dir), void returnCodeSession(String user, String session, String dir), void wrongQR()}) {
+    scanQR(
+//      qrType: "CA",
+      returnCode: (List<String> s) {
+        s[0] == "CA" ? eventID != s[2] ? wrongQR() : returnCode(s[1], s[3]) : returnCodeSession(s[1], s[2], s[3]);
+      },
+      wrongQR: wrongQR,
+    );
+  }
+
+//  static void scanCheckInAttendeeSession({void returnCode(String user, String session, String dir), void wrongQR()}) {
+//    scanQR(
+//      qrType: "SA",
+//      returnCode: (List<String> s) {
+//        returnCode(s[1], s[2], s[3]);
+//      },
+//      wrongQR: wrongQR,
+//    );
+//  }
   static void scanBoardingPass(void returnCode(String s), void wrongQR()) {
     scanQR(
       qrType: "BP",
@@ -29,8 +46,7 @@ class QRActions {
     );
   }
 
-  static void scanCheckInSelf(
-      {String eventID, void returnCode(String s), void wrongQR()}) {
+  static void scanCheckInSelf({String eventID, void returnCode(String s), void wrongQR()}) {
     scanQR(
       qrType: "CS",
       returnCode: (List<String> s) {
@@ -40,8 +56,7 @@ class QRActions {
     );
   }
 
-  static void scanCheckOutSelf(
-      {String eventID, void returnCode(String s), void wrongQR()}) {
+  static void scanCheckOutSelf({String eventID, void returnCode(String s), void wrongQR()}) {
     scanQR(
       qrType: "CO",
       returnCode: (List<String> s) {
@@ -51,39 +66,27 @@ class QRActions {
     );
   }
 
-  static void scanCheckInSessionSelf(
-      {String direction,
-      String sessionID,
-      void returnCode(String s),
-      void wrongQR()}) {
+  static void scanCheckInSessionSelf({String direction, String sessionID, void returnCode(String s), void wrongQR()}) {
     scanQR(
       qrType: "SS",
       returnCode: (List<String> s) {
-        sessionID != s[1]
-            ? wrongQR()
-            : direction != s[2] ? wrongQR() : returnCode(s[1]);
-      },
-      wrongQR: wrongQR,
-    );
-  }
-  static void scanCheckInWorkshopSelf(
-      {String direction,
-      String workshopID,
-      void returnCode(String s),
-      void wrongQR()}) {
-    scanQR(
-      qrType: "SW",
-      returnCode: (List<String> s) {
-        workshopID != s[1]
-            ? wrongQR()
-            : direction != s[2] ? wrongQR() : returnCode(s[1]);
+        sessionID != s[1] ? wrongQR() : direction != s[2] ? wrongQR() : returnCode(s[1]);
       },
       wrongQR: wrongQR,
     );
   }
 
-  static void scanCheckOutSessionSelf(
-      {String sessionID, void returnCode(String s), void wrongQR()}) {
+  static void scanCheckInWorkshopSelf({String direction, String workshopID, void returnCode(String s), void wrongQR()}) {
+    scanQR(
+      qrType: "SW",
+      returnCode: (List<String> s) {
+        workshopID != s[1] ? wrongQR() : direction != s[2] ? wrongQR() : returnCode(s[1]);
+      },
+      wrongQR: wrongQR,
+    );
+  }
+
+  static void scanCheckOutSessionSelf({String sessionID, void returnCode(String s), void wrongQR()}) {
     scanQR(
       qrType: "SO",
       returnCode: (List<String> s) {
@@ -93,8 +96,7 @@ class QRActions {
     );
   }
 
-  static void scanBooth(
-      {String boothID, void returnCode(String s), void wrongQR()}) {
+  static void scanBooth({String boothID, void returnCode(String s), void wrongQR()}) {
     scanQR(
       qrType: "BS",
       returnCode: (List<String> s) {
@@ -104,35 +106,9 @@ class QRActions {
     );
   }
 
-  static void scanCheckInAttendee(
-      {String eventID,
-      void returnCode(String session, String dir),
-      void wrongQR()}) {
-    scanQR(
-      qrType: "CA",
-      returnCode: (List<String> s) {
-        eventID != s[2] ? wrongQR() : returnCode(s[1], s[3]);
-      },
-      wrongQR: wrongQR,
-    );
-  }
 
-  static void scanCheckInAttendeeSession(
-      {void returnCode(String user, String session, String dir),
-      void wrongQR()}) {
-    scanQR(
-      qrType: "SA",
-      returnCode: (List<String> s) {
-        returnCode(s[1], s[2], s[3]);
-      },
-      wrongQR: wrongQR,
-    );
-  }
 
-  static void scanCheckInSessionAttendee(
-      {String sessionID,
-      void returnCode(String s, String dir),
-      void wrongQR()}) {
+  static void scanCheckInSessionAttendee({String sessionID, void returnCode(String s, String dir), void wrongQR()}) {
     scanQR(
       qrType: "SA",
       returnCode: (List<String> s) {
@@ -142,11 +118,10 @@ class QRActions {
     );
   }
 
-  static void scanQR(
-      {String qrType, void returnCode(List<String> s), void wrongQR()}) {
+  static void scanQR({String qrType, void returnCode(List<String> s), void wrongQR()}) {
     scanEventQr((String qrCode) {
       List<String> qrCodeArray = qrCode.split("|");
-      qrCodeArray[0] == qrType ? returnCode(qrCodeArray) : wrongQR();
+      (qrCodeArray[0] == qrType || qrType == null) ? returnCode(qrCodeArray) : wrongQR();
     });
   }
 
