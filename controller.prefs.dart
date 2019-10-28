@@ -1,5 +1,4 @@
 import 'util.firebase.dart';
-import 'util.preferences.dart';
 
 class PreferencePresenter {
   static void getVersion(String userID, void versionRetrieved(Map data)) {

@@ -2,16 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'util.dialog.dart';
 import 'model.events.dart';
-import 'model.session.dart';
 import 'model.notification.dart';
 import 'controller.notifications.dart';
-import 'model.participation.dart';
-import 'controller.participation.dart';
 import 'model.profile.dart';
 import 'model.badges.dart';
 import 'screen.textDialog.dart';
-import 'screen.feedback.dart';
-import 'screen.questions.dart';
 import 'ui.eventActions.dart';
 
 import 'util.firebase.dart';

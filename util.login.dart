@@ -138,22 +138,25 @@ class LoginFunctions {
   }
 
   void setupFCM(void done()) {
-    if (Platform.isIOS) iOS_Permission();
+    if (Platform.isIOS) iOSPermission();
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) {
         print("onMessage: $message");
+        return null;
       },
       onLaunch: (Map<String, dynamic> message) {
         print("onLaunch: $message");
+        return null;
       },
       onResume: (Map<String, dynamic> message) {
         print("onResume: $message");
+        return null;
       },
     );
     done();
   }
 
-  static void iOS_Permission() {
+  static void iOSPermission() {
     _firebaseMessaging.requestNotificationPermissions(
         IosNotificationSettings(sound: true, badge: true, alert: true));
     _firebaseMessaging.onIosSettingsRegistered

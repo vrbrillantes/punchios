@@ -3,7 +3,6 @@ import 'screen.workshopview.dart';
 import 'controller.attendance.dart';
 import 'model.session.dart';
 import 'screen.sessionview.dart';
-import 'screen.workshopview.dart';
 import 'util.firebase.dart';
 
 class SessionsHolder {

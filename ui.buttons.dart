@@ -37,7 +37,6 @@ class SessionNavigationFlatButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Container(
       padding: EdgeInsets.fromLTRB(18, 30, 18, 0),
       child: Row(

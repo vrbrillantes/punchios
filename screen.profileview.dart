@@ -291,6 +291,8 @@ class _ProfileFormBuild extends State<ProfileForm> {
                     ? PunchRaisedButton(action: () => saveDetails(), label: "Save")
                     : Row(children: <Widget>[PunchOSFlatButton(label: 'Edit my information', onPressed: startEditing, bold: true)]);
                 break;
+              default:
+                return SizedBox();
             }
           },
           childCount: 4,

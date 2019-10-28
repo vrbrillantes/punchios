@@ -95,6 +95,7 @@ class EventActions2 extends StatelessWidget {
             case 2:
               return SizedBox(height: 100);
           }
+          return null;
         },
         childCount: 3,
       ),
@@ -109,7 +110,7 @@ class CollabList extends StatelessWidget {
   final VoidCallback onAdd;
   final Function(String) onDelete;
 
-  String submitString = "SUBMITBUTTONTRIGGER";
+  final String submitString = "SUBMITBUTTONTRIGGER";
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +143,7 @@ class CheckedInList extends StatelessWidget {
 
   final List<String> collabs;
 
-  String submitString = "SUBMITBUTTONTRIGGER";
+  final String submitString = "SUBMITBUTTONTRIGGER";
 
   @override
   Widget build(BuildContext context) {

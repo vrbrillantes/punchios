@@ -3,11 +3,9 @@ import 'ui.util.dart';
 import 'ui.backdrop.dart';
 import 'util.dialog.dart';
 import 'controller.sessions.dart';
-import 'controller.calendar.dart';
 import 'controller.attendance.dart';
 import 'ui.list.session.dart';
 import 'model.session.dart';
-import 'model.attendance.dart';
 
 class ScreenSessions extends StatelessWidget {
   ScreenSessions({this.sessions, this.calendarHolder, this.eventName});

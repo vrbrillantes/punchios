@@ -65,7 +65,7 @@ class AttendanceHolder {
   GenericDialogGenerator dialog;
   String userKey;
 
-//  Map<String, SlotAttendance> sessionAttendance = {}; TODO SESSION ATTENDANCE IS THIS NEEDED
+//  Map<String, SlotAttendance> sessionAttendance = {}; TODO SESSION ATTENDANCE; IS THIS NEEDED?
   Map<String, WorkshopAttendance> workshopAttendance = {};
   bool isOnline;
   StreamSubscription _subscriptionEventAttendance;

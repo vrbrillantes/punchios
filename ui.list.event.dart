@@ -5,7 +5,6 @@ import 'screen.eventscaffold.dart';
 import 'ui.eventWidgets.dart';
 import 'ui.util.dart';
 import 'controller.events.dart';
-import 'controller.profile.dart';
 
 List<String> pageTitles = <String>['All events', 'Events I\'m interested in', 'My profile'];
 
@@ -41,8 +40,6 @@ class ListEventState extends State<ListEvent> {
 
   @override
   void initState() {
-    // TODO: implement initState
-
     allEvents.getEvents(() => setState(() {}));
     super.initState();
   }

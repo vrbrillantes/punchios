@@ -73,6 +73,7 @@ class _ScaffoldEventBuild extends State<ScaffoldEventState> {
                       ),
                     ),
                   );
+                return SizedBox();
               },
               childCount: 1,
             ),

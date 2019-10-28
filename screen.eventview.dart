@@ -308,52 +308,51 @@ class _ScreenEventViewBuild extends State<ScreenEventViewState> with TickerProvi
                   ),
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
-                          (BuildContext context, int index) {
-                        if (index == 0)
-                          return Container(
-                            color: AppColors.appColorWhite,
-                            child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: <Widget>[
-                                  EventStatus(myAttendance: attendanceHolder.attendance),
-                                  Padding(
-                                    padding: EdgeInsets.all(18),
-                                    child: Text(loadEvent.eventDetails.name, style: AppTextStyles.eventTitle),
-                                  ),
-                                  EventDetailsBar(loadEvent: loadEvent),
-                                  sessionsHolder.hasSessions() ? SessionDetailsBar(onPressed: gotoSessions) : SizedBox(),
-                                  showShowMore
-                                      ? Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
+                      (BuildContext context, int index) {
+                        return Container(
+                          color: AppColors.appColorWhite,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                EventStatus(myAttendance: attendanceHolder.attendance),
+                                Padding(
+                                  padding: EdgeInsets.all(18),
+                                  child: Text(loadEvent.eventDetails.name, style: AppTextStyles.eventTitle),
+                                ),
+                                EventDetailsBar(loadEvent: loadEvent),
+                                sessionsHolder.hasSessions() ? SessionDetailsBar(onPressed: gotoSessions) : SizedBox(),
+                                showShowMore
+                                    ? Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: <Widget>[
+                                          PunchOSFlatButton(onPressed: toggleDetails, label: "Show more", bold: true),
+                                        ],
+                                      )
+                                    : SizedBox(),
+                                SizeTransition(
+                                  sizeFactor: animation2,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: <Widget>[
-                                      PunchOSFlatButton(onPressed: toggleDetails, label: "Show more", bold: true),
-                                    ],
-                                  )
-                                      : SizedBox(),
-                                  SizeTransition(
-                                    sizeFactor: animation2,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        AttendeesDetailsBar(loadEvent: loadEvent, eventAttendees: eventAttendees.regAttendeeCount),
-                                        Padding(
-                                          padding: EdgeInsets.all(18),
-                                          child: Text(loadEvent.eventDetails.longDescription, style: AppTextStyles.eventDetailsGrey),
-                                        ),
-                                        RelatedInfoDetailsBar(eventLinks: eventHolder.eventLinks),
+                                      AttendeesDetailsBar(loadEvent: loadEvent, eventAttendees: eventAttendees.regAttendeeCount),
+                                      Padding(
+                                        padding: EdgeInsets.all(18),
+                                        child: Text(loadEvent.eventDetails.longDescription, style: AppTextStyles.eventDetailsGrey),
+                                      ),
+                                      RelatedInfoDetailsBar(eventLinks: eventHolder.eventLinks),
 //                                        Padding(
 //                                          padding: EdgeInsets.all(18),
 //                                          child: EventIcons(space: false, interestedval: loadEvent.isInterested),
 //                                        ),
-                                      ],
-                                    ),
+                                    ],
                                   ),
-                                  SizedBox(height: 18)
-                                ],
-                              ),
+                                ),
+                                SizedBox(height: 18)
+                              ],
                             ),
-                          );
+                          ),
+                        );
                       },
                       childCount: 1,
                     ),
